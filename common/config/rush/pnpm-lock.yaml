@@ -14672,10 +14672,6 @@ packages:
       '@types/express':
         optional: true
 
-  http-proxy@1.11.1:
-    resolution: {integrity: sha512-qz7jZarkVG3G6GMq+4VRJPSN4NkIjL4VMTNhKGd8jc25BumeJjWWvnY3A7OkCGa8W1TTxbaK3dcE0ijFalITVA==}
-    engines: {node: '>=0.10.0'}
-
   http-proxy@1.18.1:
     resolution: {integrity: sha512-7mz/721AbnJwIVbnaSv1Cz3Am0ZLT/UBwkC92VlxhXv/k/BBQfM2fXElQNC27BVGr0uwUpplYPQM9LnaBMR5NQ==}
     engines: {node: '>=8.0.0'}
@@ -36779,11 +36775,6 @@ snapshots:
   core-util-is@1.0.2: {}
 
   core-util-is@1.0.3: {}
-
-  cors-anywhere@0.4.4:
-    dependencies:
-      http-proxy: 1.11.1
-      proxy-from-env: 0.0.1
 
   cors@2.8.5:
     dependencies:
