@@ -12196,14 +12196,6 @@ packages:
   brace-expansion@2.0.2:
     resolution: {integrity: sha512-Jt0vHyM+jmUBqojB7E1NIYadt0vI0Qxjxd2TErW94wDz+E2LAm5vKMXXwg6ZZBTHPuUlDgQHKXvjGBdfcF1ZDQ==}
 
-  braces@1.8.5:
-    resolution: {integrity: sha512-xU7bpz2ytJl1bH9cgIurjpg/n8Gohy9GTw81heDYLJQ4RU60dlyJsa+atVF2pI0yMMvKxI9HkKwjePCj5XI1hw==}
-    engines: {node: '>=0.10.0'}
-
-  braces@2.3.2:
-    resolution: {integrity: sha512-aNdbnj9P8PjdXU4ybaWLK2IF3jc/EoDYbC7AazW6to3TRsfXxscC9UXOB5iDiEQrkyIbWp2SLQda4+QAa7nc3w==}
-    engines: {node: '>=0.10.0'}
-
   braces@3.0.3:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
     engines: {node: '>=8'}
@@ -12594,12 +12586,6 @@ packages:
   cheerio@1.1.0:
     resolution: {integrity: sha512-+0hMx9eYhJvWbgpKV9hN7jg0JcwydpopZE4hgi+KvQtByZXPp04NiCWU0LzcAbP63abZckIHkTQaXVF52mX3xQ==}
     engines: {node: '>=18.17'}
-
-  chokidar@1.7.0:
-    resolution: {integrity: sha512-mk8fAWcRUOxY7btlLtitj3A45jOwSAxH4tOFOoEGbVsl6cL6pPMWUy7dwZ/canfj3QEdP6FHSnf/l1c6/WkzVg==}
-
-  chokidar@2.1.8:
-    resolution: {integrity: sha512-ZmZUazfOzf0Nve7duiCKD23PFSCs4JPoYyccjUFF3aQkQadqBhfzhjkwBH2mNOG9cTBwhamM37EIsIkZw3nRgg==}
 
   chokidar@3.6.0:
     resolution: {integrity: sha512-7VT13fmjotKpGipCW9JEQAusEPE+Ei8nl6/g4FBAmIm0GOOLMua9NDDo/DWp0ZAxCr3cPq5ZpBqmPAQgDda2Pw==}
@@ -15993,10 +15979,6 @@ packages:
     peerDependenciesMeta:
       '@types/express':
         optional: true
-
-  http-proxy@1.11.1:
-    resolution: {integrity: sha512-qz7jZarkVG3G6GMq+4VRJPSN4NkIjL4VMTNhKGd8jc25BumeJjWWvnY3A7OkCGa8W1TTxbaK3dcE0ijFalITVA==}
-    engines: {node: '>=0.10.0'}
 
   http-proxy@1.18.1:
     resolution: {integrity: sha512-7mz/721AbnJwIVbnaSv1Cz3Am0ZLT/UBwkC92VlxhXv/k/BBQfM2fXElQNC27BVGr0uwUpplYPQM9LnaBMR5NQ==}
@@ -39043,43 +39025,6 @@ snapshots:
     dependencies:
       balanced-match: 1.0.2
 
-  braces@1.8.5:
-    dependencies:
-      expand-range: 1.8.2
-      preserve: 0.2.0
-      repeat-element: 1.1.4
-
-  braces@2.3.2(supports-color@4.5.0):
-    dependencies:
-      arr-flatten: 1.1.0
-      array-unique: 0.3.2
-      extend-shallow: 2.0.1
-      fill-range: 4.0.0
-      isobject: 3.0.1
-      repeat-element: 1.1.4
-      snapdragon: 0.8.2(supports-color@4.5.0)
-      snapdragon-node: 2.1.1
-      split-string: 3.1.0
-      to-regex: 3.0.2
-    transitivePeerDependencies:
-      - supports-color
-    optional: true
-
-  braces@2.3.2(supports-color@5.5.0):
-    dependencies:
-      arr-flatten: 1.1.0
-      array-unique: 0.3.2
-      extend-shallow: 2.0.1
-      fill-range: 4.0.0
-      isobject: 3.0.1
-      repeat-element: 1.1.4
-      snapdragon: 0.8.2(supports-color@5.5.0)
-      snapdragon-node: 2.1.1
-      split-string: 3.1.0
-      to-regex: 3.0.2
-    transitivePeerDependencies:
-      - supports-color
-
   braces@3.0.3:
     dependencies:
       fill-range: 7.1.1
@@ -39609,62 +39554,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  chokidar@2.1.8:
-    dependencies:
-      anymatch: 2.0.0
-      async-each: 1.0.6
-      braces: 2.3.2(supports-color@5.5.0)
-      glob-parent: 3.1.0
-      inherits: 2.0.4
-      is-binary-path: 1.0.1
-      is-glob: 4.0.3
-      normalize-path: 3.0.0
-      path-is-absolute: 1.0.1
-      readdirp: 2.2.1
-      upath: 1.2.0
-    optionalDependencies:
-      fsevents: 1.2.13
-    transitivePeerDependencies:
-      - supports-color
-    optional: true
-
-  chokidar@2.1.8(supports-color@4.5.0):
-    dependencies:
-      anymatch: 2.0.0(supports-color@4.5.0)
-      async-each: 1.0.6
-      braces: 2.3.2(supports-color@4.5.0)
-      glob-parent: 3.1.0
-      inherits: 2.0.4
-      is-binary-path: 1.0.1
-      is-glob: 4.0.3
-      normalize-path: 3.0.0
-      path-is-absolute: 1.0.1
-      readdirp: 2.2.1(supports-color@4.5.0)
-      upath: 1.2.0
-    optionalDependencies:
-      fsevents: 1.2.13
-    transitivePeerDependencies:
-      - supports-color
-    optional: true
-
-  chokidar@2.1.8(supports-color@5.5.0):
-    dependencies:
-      anymatch: 2.0.0(supports-color@5.5.0)
-      async-each: 1.0.6
-      braces: 2.3.2(supports-color@5.5.0)
-      glob-parent: 3.1.0
-      inherits: 2.0.4
-      is-binary-path: 1.0.1
-      is-glob: 4.0.3
-      normalize-path: 3.0.0
-      path-is-absolute: 1.0.1
-      readdirp: 2.2.1(supports-color@5.5.0)
-      upath: 1.2.0
-    optionalDependencies:
-      fsevents: 1.2.13
-    transitivePeerDependencies:
-      - supports-color
-
   chokidar@3.6.0:
     dependencies:
       anymatch: 3.1.3
@@ -40123,11 +40012,6 @@ snapshots:
   core-util-is@1.0.2: {}
 
   core-util-is@1.0.3: {}
-
-  cors-anywhere@0.4.4:
-    dependencies:
-      http-proxy: 1.11.1
-      proxy-from-env: 0.0.1
 
   cors@2.8.5:
     dependencies:
@@ -44608,11 +44492,6 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  http-proxy@1.11.1:
-    dependencies:
-      eventemitter3: 1.2.0
-      requires-port: 0.0.1
-
   http-proxy@1.18.1(debug@3.2.7(supports-color@5.5.0)):
     dependencies:
       eventemitter3: 4.0.7
@@ -48441,77 +48320,6 @@ snapshots:
       micromark-util-subtokenize: 2.1.0
       micromark-util-symbol: 2.0.1
       micromark-util-types: 2.0.2
-    transitivePeerDependencies:
-      - supports-color
-
-  micromatch@2.3.11:
-    dependencies:
-      arr-diff: 2.0.0
-      array-unique: 0.2.1
-      braces: 1.8.5
-      expand-brackets: 0.1.5
-      extglob: 0.3.2
-      filename-regex: 2.0.1
-      is-extglob: 1.0.0
-      is-glob: 2.0.1
-      kind-of: 3.2.2
-      normalize-path: 2.1.1
-      object.omit: 2.0.1
-      parse-glob: 3.0.4
-      regex-cache: 0.4.4
-
-  micromatch@3.1.10:
-    dependencies:
-      arr-diff: 4.0.0
-      array-unique: 0.3.2
-      braces: 2.3.2(supports-color@5.5.0)
-      define-property: 2.0.2
-      extend-shallow: 3.0.2
-      extglob: 2.0.4(supports-color@5.5.0)
-      fragment-cache: 0.2.1
-      kind-of: 6.0.3
-      nanomatch: 1.2.13(supports-color@5.5.0)
-      object.pick: 1.3.0
-      regex-not: 1.0.2
-      snapdragon: 0.8.2(supports-color@5.5.0)
-      to-regex: 3.0.2
-    transitivePeerDependencies:
-      - supports-color
-
-  micromatch@3.1.10(supports-color@4.5.0):
-    dependencies:
-      arr-diff: 4.0.0
-      array-unique: 0.3.2
-      braces: 2.3.2(supports-color@4.5.0)
-      define-property: 2.0.2
-      extend-shallow: 3.0.2
-      extglob: 2.0.4(supports-color@4.5.0)
-      fragment-cache: 0.2.1
-      kind-of: 6.0.3
-      nanomatch: 1.2.13(supports-color@4.5.0)
-      object.pick: 1.3.0
-      regex-not: 1.0.2
-      snapdragon: 0.8.2(supports-color@4.5.0)
-      to-regex: 3.0.2
-    transitivePeerDependencies:
-      - supports-color
-    optional: true
-
-  micromatch@3.1.10(supports-color@5.5.0):
-    dependencies:
-      arr-diff: 4.0.0
-      array-unique: 0.3.2
-      braces: 2.3.2(supports-color@5.5.0)
-      define-property: 2.0.2
-      extend-shallow: 3.0.2
-      extglob: 2.0.4(supports-color@5.5.0)
-      fragment-cache: 0.2.1
-      kind-of: 6.0.3
-      nanomatch: 1.2.13(supports-color@5.5.0)
-      object.pick: 1.3.0
-      regex-not: 1.0.2
-      snapdragon: 0.8.2(supports-color@5.5.0)
-      to-regex: 3.0.2
     transitivePeerDependencies:
       - supports-color
 

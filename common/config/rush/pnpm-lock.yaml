@@ -16,7 +16,7 @@ importers:
         specifier: ^8.0.0
         version: 8.1.0
       '@types/mocha':
-        specifier: ^10.0.1
+        specifier: ^10.0.10
         version: 10.0.10
       '@types/node':
         specifier: ^18.11.19
@@ -43,8 +43,8 @@ importers:
         specifier: ^8.1.0
         version: 8.1.0
       mocha:
-        specifier: ^10.2.0
-        version: 10.8.2
+        specifier: ^11.7.1
+        version: 11.7.1
       typescript:
         specifier: 5.8.3
         version: 5.8.3
@@ -240,7 +240,7 @@ importers:
         specifier: ^4.3.9
         version: 4.3.20
       '@types/mocha':
-        specifier: ~10.0.3
+        specifier: ~10.0.10
         version: 10.0.10
       '@types/node':
         specifier: ^18.18.7
@@ -288,8 +288,8 @@ importers:
         specifier: 2.0.1
         version: 2.0.1
       mocha:
-        specifier: ^10.2.0
-        version: 10.8.2
+        specifier: ^11.7.1
+        version: 11.7.1
       pako:
         specifier: ^2.1.0
         version: 2.1.0
@@ -319,7 +319,7 @@ importers:
         version: 1.51.0
       vscode-extension-tester:
         specifier: ^5.10.0
-        version: 5.10.0(mocha@10.8.2)(typescript@5.8.3)
+        version: 5.10.0(mocha@11.7.1)(typescript@5.8.3)
       webpack:
         specifier: ^5.89.0
         version: 5.99.9(webpack-cli@5.1.4)
@@ -2301,7 +2301,7 @@ importers:
         specifier: ~1.52.0
         version: 1.52.0
       '@types/mocha':
-        specifier: ^10.0.3
+        specifier: ^10.0.10
         version: 10.0.10
       '@types/node':
         specifier: 22.15.18
@@ -2337,8 +2337,8 @@ importers:
         specifier: ^11.0.2
         version: 11.0.3
       mocha:
-        specifier: ^11.2.2
-        version: 11.7.0
+        specifier: ^11.7.1
+        version: 11.7.1
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21
@@ -2453,7 +2453,7 @@ importers:
         specifier: ^4.0.9
         version: 4.0.9
       '@types/mocha':
-        specifier: ~10.0.1
+        specifier: ~10.0.10
         version: 10.0.10
       '@types/node':
         specifier: ^22.15.24
@@ -2483,8 +2483,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.0
       mocha:
-        specifier: ^11.5.0
-        version: 11.7.0
+        specifier: ^11.7.1
+        version: 11.7.1
       terser-webpack-plugin:
         specifier: ^5.3.10
         version: 5.3.14(webpack@5.99.9)
@@ -2496,7 +2496,7 @@ importers:
         version: 5.8.3
       vscode-extension-tester:
         specifier: ^8.14.1
-        version: 8.14.1(mocha@11.7.0)(typescript@5.8.3)
+        version: 8.14.1(mocha@11.7.1)(typescript@5.8.3)
       webpack:
         specifier: ^5.99.9
         version: 5.99.9(webpack-cli@6.0.1)
@@ -3517,7 +3517,7 @@ importers:
         version: 1.51.0
       vscode-extension-tester:
         specifier: ~8.14.1
-        version: 8.14.1(mocha@11.7.0)(typescript@5.8.3)
+        version: 8.14.1(mocha@11.7.1)(typescript@5.8.3)
       vscode-languageclient:
         specifier: ^9.0.1
         version: 9.0.1
@@ -3541,7 +3541,7 @@ importers:
         specifier: ~1.52.0
         version: 1.52.0
       '@types/mocha':
-        specifier: ^10.0.1
+        specifier: ^10.0.10
         version: 10.0.10
       '@types/node':
         specifier: 22.15.21
@@ -3577,8 +3577,8 @@ importers:
         specifier: ^11.0.2
         version: 11.0.3
       mocha:
-        specifier: ^11.4.0
-        version: 11.7.0
+        specifier: ^11.7.1
+        version: 11.7.1
       playwright-core:
         specifier: ~1.52.0
         version: 1.52.0
@@ -4008,7 +4008,7 @@ importers:
         specifier: ^4.0.9
         version: 4.0.9
       '@types/mocha':
-        specifier: ~10.0.1
+        specifier: ~10.0.10
         version: 10.0.10
       '@types/node':
         specifier: ^22.15.21
@@ -4038,8 +4038,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.0
       mocha:
-        specifier: ^11.5.0
-        version: 11.7.0
+        specifier: ^11.7.1
+        version: 11.7.1
       terser-webpack-plugin:
         specifier: ^5.3.14
         version: 5.3.14(webpack@5.99.9)
@@ -4051,7 +4051,7 @@ importers:
         version: 5.8.3
       vscode-extension-tester:
         specifier: ^8.14.1
-        version: 8.14.1(mocha@11.7.0)(typescript@5.8.3)
+        version: 8.14.1(mocha@11.7.1)(typescript@5.8.3)
       webpack:
         specifier: ^5.99.9
         version: 5.99.9(webpack-cli@6.0.1)
@@ -11163,14 +11163,6 @@ packages:
   brace-expansion@2.0.2:
     resolution: {integrity: sha512-Jt0vHyM+jmUBqojB7E1NIYadt0vI0Qxjxd2TErW94wDz+E2LAm5vKMXXwg6ZZBTHPuUlDgQHKXvjGBdfcF1ZDQ==}
 
-  braces@1.8.5:
-    resolution: {integrity: sha512-xU7bpz2ytJl1bH9cgIurjpg/n8Gohy9GTw81heDYLJQ4RU60dlyJsa+atVF2pI0yMMvKxI9HkKwjePCj5XI1hw==}
-    engines: {node: '>=0.10.0'}
-
-  braces@2.3.2:
-    resolution: {integrity: sha512-aNdbnj9P8PjdXU4ybaWLK2IF3jc/EoDYbC7AazW6to3TRsfXxscC9UXOB5iDiEQrkyIbWp2SLQda4+QAa7nc3w==}
-    engines: {node: '>=0.10.0'}
-
   braces@3.0.3:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
     engines: {node: '>=8'}
@@ -11554,12 +11546,6 @@ packages:
   cheerio@1.1.0:
     resolution: {integrity: sha512-+0hMx9eYhJvWbgpKV9hN7jg0JcwydpopZE4hgi+KvQtByZXPp04NiCWU0LzcAbP63abZckIHkTQaXVF52mX3xQ==}
     engines: {node: '>=18.17'}
-
-  chokidar@1.7.0:
-    resolution: {integrity: sha512-mk8fAWcRUOxY7btlLtitj3A45jOwSAxH4tOFOoEGbVsl6cL6pPMWUy7dwZ/canfj3QEdP6FHSnf/l1c6/WkzVg==}
-
-  chokidar@2.1.8:
-    resolution: {integrity: sha512-ZmZUazfOzf0Nve7duiCKD23PFSCs4JPoYyccjUFF3aQkQadqBhfzhjkwBH2mNOG9cTBwhamM37EIsIkZw3nRgg==}
 
   chokidar@3.6.0:
     resolution: {integrity: sha512-7VT13fmjotKpGipCW9JEQAusEPE+Ei8nl6/g4FBAmIm0GOOLMua9NDDo/DWp0ZAxCr3cPq5ZpBqmPAQgDda2Pw==}
@@ -17163,13 +17149,8 @@ packages:
   mlly@1.7.4:
     resolution: {integrity: sha512-qmdSIPC4bDJXgZTCR7XosJiNKySV7O215tsPtDN9iEO/7q/76b/ijtgRu/+epFXSJhijtTCCGp3DWS549P3xKw==}
 
-  mocha@10.8.2:
-    resolution: {integrity: sha512-VZlYo/WE8t1tstuRmqgeyBgCbJc/lEdopaa+axcKzTBJ+UIdlAB9XnmvTCAH4pwR4ElNInaedhEBmZD8iCSVEg==}
-    engines: {node: '>= 14.0.0'}
-    hasBin: true
-
-  mocha@11.7.0:
-    resolution: {integrity: sha512-bXfLy/mI8n4QICg+pWj1G8VduX5vC0SHRwFpiR5/Fxc8S2G906pSfkyMmHVsdJNQJQNh3LE67koad9GzEvkV6g==}
+  mocha@11.7.1:
+    resolution: {integrity: sha512-5EK+Cty6KheMS/YLPPMJC64g5V61gIR25KsRItHw6x4hEKT6Njp1n9LOlH4gpevuwMVS66SXaBBpg+RWZkza4A==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     hasBin: true
 
@@ -22605,9 +22586,6 @@ packages:
 
   worker-rpc@0.1.1:
     resolution: {integrity: sha512-P1WjMrUB3qgJNI9jfmpZ/htmBEjFh//6l/5y8SD9hg1Ef5zTTVVoRjTrTEzPrNBQvmhMxkoTsjOXN10GWU7aCg==}
-
-  workerpool@6.5.1:
-    resolution: {integrity: sha512-Fs4dNYcsdpYSAfVxhnl1L5zTksjvOJxtC5hzMNl+1t9B8hTJTdKDyZ5ju7ztgPy+ft9tBFXoOlDNiOT9WUXZlA==}
 
   workerpool@9.3.2:
     resolution: {integrity: sha512-Xz4Nm9c+LiBHhDR5bDLnNzmj6+5F+cyEAWPMkbs2awq/dYazR/efelZzUAjB/y3kNHL+uzkHvxVVpaOfGCPV7A==}
@@ -35837,25 +35815,6 @@ snapshots:
     dependencies:
       balanced-match: 1.0.2
 
-  braces@1.8.5:
-    dependencies:
-      expand-range: 1.8.2
-      preserve: 0.2.0
-      repeat-element: 1.1.4
-
-  braces@2.3.2:
-    dependencies:
-      arr-flatten: 1.1.0
-      array-unique: 0.3.2
-      extend-shallow: 2.0.1
-      fill-range: 4.0.0
-      isobject: 3.0.1
-      repeat-element: 1.1.4
-      snapdragon: 0.8.2
-      snapdragon-node: 2.1.1
-      split-string: 3.1.0
-      to-regex: 3.0.2
-
   braces@3.0.3:
     dependencies:
       fill-range: 7.1.1
@@ -36372,22 +36331,6 @@ snapshots:
       is-glob: 2.0.1
       path-is-absolute: 1.0.1
       readdirp: 2.2.1
-    optionalDependencies:
-      fsevents: 1.2.13
-
-  chokidar@2.1.8:
-    dependencies:
-      anymatch: 2.0.0
-      async-each: 1.0.6
-      braces: 2.3.2
-      glob-parent: 3.1.0
-      inherits: 2.0.4
-      is-binary-path: 1.0.1
-      is-glob: 4.0.3
-      normalize-path: 3.0.0
-      path-is-absolute: 1.0.1
-      readdirp: 2.2.1
-      upath: 1.2.0
     optionalDependencies:
       fsevents: 1.2.13
 
@@ -44062,38 +44005,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  micromatch@2.3.11:
-    dependencies:
-      arr-diff: 2.0.0
-      array-unique: 0.2.1
-      braces: 1.8.5
-      expand-brackets: 0.1.5
-      extglob: 0.3.2
-      filename-regex: 2.0.1
-      is-extglob: 1.0.0
-      is-glob: 2.0.1
-      kind-of: 3.2.2
-      normalize-path: 2.1.1
-      object.omit: 2.0.1
-      parse-glob: 3.0.4
-      regex-cache: 0.4.4
-
-  micromatch@3.1.10:
-    dependencies:
-      arr-diff: 4.0.0
-      array-unique: 0.3.2
-      braces: 2.3.2
-      define-property: 2.0.2
-      extend-shallow: 3.0.2
-      extglob: 2.0.4
-      fragment-cache: 0.2.1
-      kind-of: 6.0.3
-      nanomatch: 1.2.13
-      object.pick: 1.3.0
-      regex-not: 1.0.2
-      snapdragon: 0.8.2
-      to-regex: 3.0.2
-
   micromatch@4.0.8:
     dependencies:
       braces: 3.0.3
@@ -44287,30 +44198,7 @@ snapshots:
       pkg-types: 1.3.1
       ufo: 1.6.1
 
-  mocha@10.8.2:
-    dependencies:
-      ansi-colors: 4.1.3
-      browser-stdout: 1.3.1
-      chokidar: 3.6.0
-      debug: 4.4.1(supports-color@8.1.1)
-      diff: 5.2.0
-      escape-string-regexp: 4.0.0
-      find-up: 5.0.0
-      glob: 8.1.0
-      he: 1.2.0
-      js-yaml: 4.1.0
-      log-symbols: 4.1.0
-      minimatch: 5.1.6
-      ms: 2.1.3
-      serialize-javascript: 6.0.2
-      strip-json-comments: 3.1.1
-      supports-color: 8.1.1
-      workerpool: 6.5.1
-      yargs: 16.2.0
-      yargs-parser: 20.2.9
-      yargs-unparser: 2.0.0
-
-  mocha@11.7.0:
+  mocha@11.7.1:
     dependencies:
       browser-stdout: 1.3.1
       chokidar: 4.0.3
@@ -50557,7 +50445,7 @@ snapshots:
       monaco-page-objects: 3.14.1(selenium-webdriver@4.33.0)(typescript@5.8.3)
       selenium-webdriver: 4.33.0
 
-  vscode-extension-tester@5.10.0(mocha@10.8.2)(typescript@5.8.3):
+  vscode-extension-tester@5.10.0(mocha@11.7.1)(typescript@5.8.3):
     dependencies:
       '@types/selenium-webdriver': 4.1.28
       '@vscode/vsce': 2.32.0
@@ -50568,7 +50456,7 @@ snapshots:
       got: 13.0.0
       hpagent: 1.2.0
       js-yaml: 4.1.0
-      mocha: 10.8.2
+      mocha: 11.7.1
       monaco-page-objects: 3.14.1(selenium-webdriver@4.33.0)(typescript@5.8.3)
       sanitize-filename: 1.6.3
       selenium-webdriver: 4.33.0
@@ -50581,7 +50469,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  vscode-extension-tester@8.14.1(mocha@11.7.0)(typescript@5.8.3):
+  vscode-extension-tester@8.14.1(mocha@11.7.1)(typescript@5.8.3):
     dependencies:
       '@redhat-developer/locators': 1.13.0(@redhat-developer/page-objects@1.13.0(selenium-webdriver@4.33.0)(typescript@5.8.3))(selenium-webdriver@4.33.0)
       '@redhat-developer/page-objects': 1.13.0(selenium-webdriver@4.33.0)(typescript@5.8.3)
@@ -50596,7 +50484,7 @@ snapshots:
       got: 14.4.7
       hpagent: 1.2.0
       js-yaml: 4.1.0
-      mocha: 11.7.0
+      mocha: 11.7.1
       sanitize-filename: 1.6.3
       selenium-webdriver: 4.33.0
       targz: 1.0.1
@@ -51658,8 +51546,6 @@ snapshots:
   worker-rpc@0.1.1:
     dependencies:
       microevent.ts: 0.1.1
-
-  workerpool@6.5.1: {}
 
   workerpool@9.3.2: {}
 
