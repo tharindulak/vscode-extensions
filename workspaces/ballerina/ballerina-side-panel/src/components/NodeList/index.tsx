@@ -32,6 +32,7 @@ import styled from "@emotion/styled";
 import { BackIcon, CloseIcon, LogIcon } from "../../resources";
 import { Category, Item, Node } from "./types";
 import { cloneDeep, debounce } from "lodash";
+import { GroupListSkeleton } from "../Skeletons";
 import GroupList from "../GroupList";
 import { useRpcContext } from "@wso2/ballerina-rpc-client";
 
@@ -367,7 +368,7 @@ export function NodeList(props: NodeListProps) {
                                         if (el && el.scrollWidth > el.clientWidth) {
                                             el.style.fontSize = "13px";
                                             el.style.wordBreak = "break-word";
-                                            el.style.whiteSpace = "normal";
+                                            el.style.whiteSpace = "nowrap";
                                         }
                                     }}
                                 >
@@ -424,14 +425,18 @@ export function NodeList(props: NodeListProps) {
 
     const getConnectionContainer = (categories: Category[]) => (
         <S.Grid columns={1}>
-            {categories.map((category, index) => (
-                <GroupList
-                    key={category.title + index + "tooltip"}
-                    category={category}
-                    expand={searchText?.length > 0}
-                    onSelect={handleAddNode}
-                />
-            ))}
+            {categories.map((category, index) =>
+                category.isLoading ? (
+                    <GroupListSkeleton key={"skeleton" + index} />
+                ) : (
+                    <GroupList
+                        key={category.title + index + "tooltip"}
+                        category={category}
+                        expand={searchText?.length > 0}
+                        onSelect={handleAddNode}
+                    />
+                ))
+            }
         </S.Grid>
     );
 

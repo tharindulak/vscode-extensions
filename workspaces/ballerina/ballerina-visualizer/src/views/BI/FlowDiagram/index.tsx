@@ -70,6 +70,7 @@ import {
     removeAgentNode,
     removeToolFromAgentNode,
 } from "../AIChatAgent/utils";
+import { DiagramSkeleton } from "../../../components/Skeletons";
 import { GET_DEFAULT_MODEL_PROVIDER } from "../../../constants";
 
 const Container = styled.div`
@@ -159,10 +160,34 @@ export function BIFlowDiagram(props: BIFlowDiagramProps) {
                     return;
                 }
                 setShowProgressIndicator(true);
+                if (parent.artifactType === DIRECTORY_MAP.CONNECTION) {
+                    updateConnectionWithNewItem(parent.recentIdentifier);
+                }
                 fetchNodesAndAISuggestions(topNodeRef.current, targetRef.current, false, false);
             }
         });
     }, [rpcClient]);
+
+    const updateConnectionWithNewItem = (recentIdentifier: string) => {
+        // Add a new item as loading into the "Connections" category
+        setCategories((prev: PanelCategory[]) => {
+            // Find the "Connections" category
+            const updated = prev.map((cat) => {
+                if (cat.title === "Connections") {
+                    // Add new item to the items array and sort the items by title
+                    return {
+                        ...cat,
+                        items: [
+                            ...(cat.items || []),
+                            { title: recentIdentifier, isLoading: true, items: [] }
+                        ].sort((a, b) => (a as PanelCategory).title.localeCompare((b as PanelCategory).title))
+                    };
+                }
+                return cat;
+            });
+            return updated as PanelCategory[];
+        });
+    };
 
     const debouncedGetFlowModel = useCallback(
         debounce(() => {
@@ -1780,11 +1805,7 @@ export function BIFlowDiagram(props: BIFlowDiagramProps) {
                     <ProgressIndicator color={ThemeColors.PRIMARY} />
                 )}
                 <Container>
-                    {!model && (
-                        <SpinnerContainer>
-                            <ProgressRing color={ThemeColors.PRIMARY} />
-                        </SpinnerContainer>
-                    )}
+                    {!model && <DiagramSkeleton />}
                     {model && <MemoizedDiagram {...memoizedDiagramProps} />}
                 </Container>
             </View>
