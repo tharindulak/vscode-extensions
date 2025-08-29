@@ -239,7 +239,7 @@ export default function createTests() {
       await editorTab.locator('.codicon-close').click();
       await editorTab.waitFor({ state: 'detached' });
 
-      expect(dm.verifyTsFileContent('basic/map.ts')).toBeTruthy();
+      expect(dm.verifyTsFileContent(path.join('basic', 'map.ts'))).toBeTruthy();
 
 
       console.log('- Test basic mapping delete');
