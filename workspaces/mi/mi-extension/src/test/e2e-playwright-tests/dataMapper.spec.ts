@@ -300,42 +300,66 @@ export default function createTests() {
       console.log('- Test direct');
       // primitive direct array mapping , PrimDirect1D
       await dm.mapFields('input.iPrimDirect1D', 'objectOutput.oPrimDirect1D', 'menu-item-a2a-direct');
-      // await dm.waitForProgressEnd();
+      try {
+        await dm.waitForProgressEnd();
+      } catch (e) {
+        console.log('Progress bar wait timeout, continuing with the test');
+      }
       await dmWebView.getByTestId('link-from-input.iPrimDirect1D.OUT-to-objectOutput.oPrimDirect1D.IN').waitFor({ state: 'attached' });
 
       console.log('- Test mapping function');
       // primitive array mapping with mapping function, PrimMapFn1D
       await dm.mapFields('input.iPrimMapFn1D', 'objectOutput.oPrimMapFn1D', 'menu-item-a2a-inner');
+      console.log('primitive array mapping with mapping function, PrimMapFn1D');
 
       await dm.mapFields('focusedInput.iPrimMapFn1DItem', 'primitiveOutput.number');
+      console.log('primitive array mapping with mapping function, PrimMapFn1D focusedInput.iPrimMapFn1DItem', 'primitiveOutput.number');
       await dmWebView.getByTestId('link-from-focusedInput.iPrimMapFn1DItem.OUT-to-primitiveOutput.number.IN').waitFor({ state: 'attached' });
+      console.log('primitive array mapping with mapping function, PrimMapFn1D focusedInput.iPrimMapFn1DItem', 'primitiveOutput.number done');
 
       await dm.gotoPreviousView();
      
       // object array mapping with mapping function, ObjMapFn1D
+      console.log('object array mapping with mapping function, ObjMapFn1D');
       await dm.mapFields('input.iObjMapFn1D', 'objectOutput.oObjMapFn1D', 'menu-item-a2a-inner');
+      console.log('object array mapping with mapping function, ObjMapFn1D done');
 
       // filter
+      console.log('Starting filter test - mapping input.iObjMapFn1D to objectOutput.oObjMapFn1D');
       await dmWebView.getByText('Add Filter').click();
+      console.log('- Test filter');
       const filterItem = dmWebView.getByText('Filter 1: iObjMapFn1DItem');
       await filterItem.waitFor();
+      console.log('Filter item text:', await filterItem.textContent());
       await expect(filterItem).toContainText('Filter 1: iObjMapFn1DItem !== null');
       await dmWebView.locator('#expression-bar').waitFor();
+      console.log('- Test expression bar focus');
       const expressionBar = dmWebView.locator('#expression-bar').getByRole('textbox', { name: 'Text field' });
       await expect(expressionBar).toBeFocused();
+      console.log('- Clicking on canvas to defocus expression bar');
       const canvas = dmWebView.locator('#data-mapper-canvas-container');
       await canvas.click();
+      console.log('- Clicking on canvas to defocus expression bar');
       await expect(expressionBar).not.toBeFocused();
+      console.log('- Refocusing expression bar');
 
       await dm.mapFields('focusedInput.iObjMapFn1DItem.p1', 'objectOutput.q1');
+      console.log('object array mapping with mapping function, ObjMapFn1D focusedInput.iObjMapFn1DItem.p1 to objectOutput.q1 done');
       await dmWebView.getByTestId('link-from-focusedInput.iObjMapFn1DItem.p1.OUT-to-objectOutput.q1.IN').waitFor({ state: 'attached' });
+      console.log('object array mapping with mapping function, ObjMapFn1D focusedInput.iObjMapFn1DItem.p1 to objectOutput.q1 verified');
 
+      console.log('- Test nested array mapping function');
       await dm.mapFields('focusedInput.iObjMapFn1DItem.p2', 'objectOutput.q2', 'menu-item-a2a-inner');
+      console.log('nested array mapping function, ObjMapFn1D focusedInput.iObjMapFn1DItem.p2 to objectOutput.q2 done');
 
+      console.log('- Test nested array mapping function item mapping');
       await dm.mapFields('focusedInput.p2Item', 'primitiveOutput.string');
+      console.log('nested array mapping function item mapping, ObjMapFn1D focusedInput.p2Item to primitiveOutput.string done');
       await dmWebView.getByTestId('link-from-focusedInput.p2Item.OUT-to-primitiveOutput.string.IN').waitFor({ state: 'attached' });
 
+      console.log('nested array mapping function item mapping, ObjMapFn1D focusedInput.p2Item to primitiveOutput.string verified');
       await dm.gotoPreviousView();
+      console.log('Going back to previous view');
       await dm.gotoPreviousView();
 
 
@@ -343,63 +367,99 @@ export default function createTests() {
       // Initialize 1d array and map, InitPrim1D
       await dm.selectConfigMenuItem('objectOutput.oInitPrim1D', 'Initialize Array With Element');
 
+      console.log('Initialize 1D array with element, ObjMapFn1D objectOutput.oInitPrim1D done');
       await dm.mapFields('input.iInitPrim', 'objectOutput.oInitPrim1D.0');
+      console.log('Mapping input.iInitPrim to objectOutput.oInitPrim1D.0 done');
       await dmWebView.getByTestId('link-from-input.iInitPrim.OUT-to-objectOutput.oInitPrim1D.0.IN').waitFor({ state: 'attached' });
 
       // Initialize 2d array and map, InitPrim2D
 
+      console.log('Initialize 2D array with element, ObjMapFn1D objectOutput.oInitPrim2D');
       await dm.selectConfigMenuItem('objectOutput.oInitPrim2D', 'Initialize Array With Element');
+      console.log('Initialize 2D array with element, ObjMapFn1D objectOutput.oInitPrim2D done');
       await dmWebView.getByTestId('array-widget-objectOutput.oInitPrim2D.IN-values').getByText('Add Element').click();
+      console.log('Clicked Add Element for objectOutput.oInitPrim2D');
       await dm.selectConfigMenuItem('objectOutput.oInitPrim2D.1', 'Add Element');
+      console.log('Added second element for objectOutput.oInitPrim2D');
 
+      console.log('Mapping input.iInitPrim to objectOutput.oInitPrim2D.1.0 done');
       await dm.mapFields('input.iInitPrim', 'objectOutput.oInitPrim2D.1.0');
+      console.log('Mapping input.iInitPrim to objectOutput.oInitPrim2D.1.0 done - verified');
       await dmWebView.getByTestId('link-from-input.iInitPrim.OUT-to-objectOutput.oInitPrim2D.1.0.IN').waitFor({ state: 'attached' });
 
+      console.log('Array Mappings - Part 1 done');
       // #PAUSE_POINT
       expect(dm.verifyTsFileContent('array/map1.ts')).toBeTruthy();
 
-
+      console.log('Starting Array Mappings - Part 1 delete');
       console.log('- Test delete');
 
+      console.log('- Deleting primitive array mapping with mapping function, PrimMapFn1D');
       const loc2 = dmWebView.getByTestId('array-connector-node-objectOutput.oPrimMapFn1D.IN');
       await loc2.locator('.codicon-trash').click({ force: true });
+      console.log('Clicked delete button');
       await loc2.waitFor({ state: 'detached' });
+      console.log('primitive array mapping with mapping function, PrimMapFn1D deleted');
 
+      console.log('- Deleting object array mapping with mapping function, ObjMapFn1D');
       const loc3 = dmWebView.getByTestId('array-connector-node-objectOutput.oObjMapFn1D.IN');
+      console.log('Expanding array mapping function node');
       await loc3.getByTestId('expand-array-fn-oObjMapFn1D').click({ force: true });
+      console.log('Clicked expand button for array mapping function node');
 
       await filterItem.hover();
+      console.log('Hovering filter item');
       await filterItem.locator('.codicon-trash').click({ force: true });
+      console.log('Clicked delete button on filter');
       await filterItem.waitFor({ state: 'detached' });
+      console.log('Clicked delete button on filter');
 
+      console.log('Expanding nested array mapping function node');
       const loc3I1 = dmWebView.getByTestId('array-connector-node-objectOutput.q2.IN');
       await loc3I1.getByTestId('expand-array-fn-q2').click({ force: true });
+      console.log('Clicked expand button for nested array mapping function node');
 
+      console.log('Deleting nested array mapping function item mapping');
       const loc3I1I1 = dmWebView.getByTestId('link-from-focusedInput.p2Item.OUT-to-primitiveOutput.string.IN');
       await loc3I1I1.click({ force: true });
+      console.log('Clicked link for nested array mapping function item');
       await dmWebView.getByTestId('expression-label-for-focusedInput.p2Item.OUT-to-primitiveOutput.string.IN')
         .locator('.codicon-trash').click({ force: true });
+      console.log('Clicked delete button for nested array mapping function item');
       await loc3I1I1.waitFor({ state: 'detached' });
+      console.log('Deleted nested array mapping function item mapping');
       await dm.gotoPreviousView();
 
+      console.log('Deleting nested array mapping function');
       await loc3I1.locator('.codicon-trash').click({ force: true });
+      console.log('Clicked delete button for nested array mapping function');
       await loc3I1.waitFor({ state: 'detached' });
+      console.log('Deleted nested array mapping function');
       await dm.gotoPreviousView();
+      console.log('Deleting object array mapping function');
 
       await loc3.locator('.codicon-trash').click({ force: true });
+      console.log('Clicked delete button for array mapping function');
       await loc3.waitFor({ state: 'detached' });
+      console.log('Deleted object array mapping function');
 
       const loc4 = dmWebView.getByTestId('link-from-input.iInitPrim.OUT-to-objectOutput.oInitPrim1D.0.IN');
       await loc4.click({ force: true });
+      console.log('Clicked link for object array mapping function');
       await dmWebView.getByTestId('expression-label-for-input.iInitPrim.OUT-to-objectOutput.oInitPrim1D.0.IN')
         .locator('.codicon-trash').click({ force: true });
+      console.log('Clicked delete button for object array mapping function');
       await loc4.waitFor({ state: 'detached' });
+      console.log('Deleted object array mapping function');
 
       const loc5 = dmWebView.getByTestId('link-from-input.iInitPrim.OUT-to-objectOutput.oInitPrim2D.1.0.IN');
       await loc5.click({ force: true });
+      console.log('Clicked link for 2D object array mapping function');
       await dmWebView.getByTestId('expression-label-for-input.iInitPrim.OUT-to-objectOutput.oInitPrim2D.1.0.IN')
         .locator('.codicon-trash').click({ force: true });
+      console.log('Clicked delete button for 2D object array mapping function');
       await loc5.waitFor({ state: 'detached' });
+      console.log('Deleted 2D object array mapping function');
 
       // #PAUSE_POINT
       expect(dm.verifyTsFileContent('array/del1.ts')).toBeTruthy();
@@ -409,6 +469,7 @@ export default function createTests() {
 
       console.log('- Edit output schema from JSON schema');
       await dm.editSchema(IOType.Output, SchemaType.JsonSchema, 'array/out2.schema.json');
+      console.log('- Edit output schema from JSON schema done');
 
       // #PAUSE_POINT
       expect(dm.verifyTsFileContent('array/init2.ts')).toBeTruthy();
@@ -416,43 +477,65 @@ export default function createTests() {
       console.log('- Test init object');
       // Init array object and map, InitObj1D
       await dm.selectConfigMenuItem('objectOutput.oInitObj1D', 'Initialize Array With Element');
+      console.log('Initialize 1D array with element, ObjMapFn1D objectOutput.oInitObj1D done');
       await dm.mapFields('input.iInitPrim', 'objectOutput.oInitObj1D.0.p1');
+      console.log('Mapping input.iInitPrim to objectOutput.oInitObj1D.0.p1 done');
       await dmWebView.getByTestId('link-from-input.iInitPrim.OUT-to-objectOutput.oInitObj1D.0.p1.IN').waitFor({ state: 'attached' });
+      console.log('Mapping input.iInitPrim to objectOutput.oInitObj1D.0.p1 done - verified');
 
       await dmWebView.getByTestId('array-widget-objectOutput.oInitObj1D.IN-values').getByText('Add Element').click();
+      console.log('Clicked Add Element for objectOutput.oInitObj1D');
       await dm.waitForProgressEnd();
+      console.log('Clicked Add Element for objectOutput.oInitObj1D done');
       await dm.mapFields('input.iInitObj', 'objectOutput.oInitObj1D.1', 'menu-item-o2o-direct');
+      console.log('Mapping input.iInitObj to objectOutput.oInitObj1D.1 done');
       await dmWebView.getByTestId('link-from-input.iInitObj.OUT-to-objectOutput.oInitObj1D.1.IN').waitFor({ state: 'attached' });
+      console.log('Mapping input.iInitObj to objectOutput.oInitObj1D.1 done - verified');
 
       console.log('- Test mapping function 2D');
       // 2D array mapping with mapping function PrimMapFn2D
       await dm.mapFields('input.iPrimMapFn2D', 'objectOutput.oPrimMapFn2D', 'menu-item-a2a-inner');
+      console.log('2D array mapping with mapping function PrimMapFn2D');
 
       await dm.mapFields('focusedInput.iPrimMapFn2DItem', 'arrayOutput', 'menu-item-a2a-inner');
+      console.log('2D array mapping with mapping function PrimMapFn2D focusedInput.iPrimMapFn2DItem to arrayOutput');
 
       await dm.mapFields('focusedInput.iPrimMapFn2DItemItem', 'primitiveOutput.number');
+      console.log('2D array mapping with mapping function PrimMapFn2D focusedInput.iPrimMapFn2DItemItem to primitiveOutput.number');
       await dmWebView.getByTestId('link-from-focusedInput.iPrimMapFn2DItemItem.OUT-to-primitiveOutput.number.IN').waitFor({ state: 'attached' });
+      console.log('2D array mapping with mapping function PrimMapFn2D focusedInput.iPrimMapFn2DItemItem to primitiveOutput.number done');
 
       await dm.gotoPreviousView();
+      console.log('Going back to previous view');
       await dm.gotoPreviousView();
 
       console.log('- Test singleton access');
       // 1D - 0D array direct mapping (singleton access) Single
       await dm.mapFields('input.iSingle1D', 'objectOutput.oSingle', 'menu-item-a2s-direct');
+      console.log('1D - 0D array direct mapping (singleton access) Single');
 
       await dmWebView.getByTestId('link-from-input.iSingle1D.OUT-to-datamapper-intermediate-port').waitFor({ state: 'attached' });
+      console.log('Mapping input.iSingle1D to datamapper-intermediate-port done');
       await dmWebView.getByTestId('link-from-datamapper-intermediate-port-to-objectOutput.oSingle.IN').waitFor({ state: 'attached' });
+      console.log('Mapping datamapper-intermediate-port to objectOutput.oSingle.IN done');
       const loc10 = dmWebView.getByTestId('link-connector-node-objectOutput.oSingle.IN');
       await loc10.waitFor();
+      console.log('1D - 0D array direct mapping (singleton access) Single done');
 
       // 1D - 0D array direct mapping (edit singleton index)
       const loc10Indx = loc10.getByTitle('indexing');
       await loc10Indx.click({ force: true });
+      console.log('Clicked singleton access index');
       await expect(expressionBar).toBeFocused();
+      console.log('Expression bar focused');
       await expressionBar.fill('input.iSingle1D[1]');
+      console.log('Filled expression bar with input.iSingle1D[1]');
       await canvas.click();
+      console.log('Clicked on canvas to defocus expression bar');
       await expect(expressionBar).not.toBeFocused();
+      console.log('Expression bar defocused');
       await expect(loc10Indx).toHaveText('[1]');
+      console.log('Singleton access index changed to 1');
 
       // #PAUSE_POINT
       expect(dm.verifyTsFileContent('array/map2.ts')).toBeTruthy();
@@ -462,37 +545,56 @@ export default function createTests() {
 
       const loc6 = dmWebView.getByTestId('link-from-input.iInitPrim.OUT-to-objectOutput.oInitObj1D.0.p1.IN');
       await loc6.click({ force: true });
+      console.log('Clicked on link-from-input.iInitPrim.OUT-to-objectOutput.oInitObj1D.0.p1.IN');
       await dmWebView.getByTestId('expression-label-for-input.iInitPrim.OUT-to-objectOutput.oInitObj1D.0.p1.IN')
         .locator('.codicon-trash').click({ force: true });
+      console.log('Clicked on delete button');
       await loc6.waitFor({ state: 'detached' });
+      console.log('Deleted mapping for link-from-input.iInitPrim.OUT-to-objectOutput.oInitObj1D.0.p1.IN');
 
       const loc8 = dmWebView.getByTestId('link-from-input.iInitObj.OUT-to-objectOutput.oInitObj1D.1.IN');
       await loc8.click({ force: true });
+      console.log('Clicked on link-from-input.iInitObj.OUT-to-objectOutput.oInitObj1D.1.IN');
       await dmWebView.getByTestId('expression-label-for-input.iInitObj.OUT-to-objectOutput.oInitObj1D.1.IN')
         .locator('.codicon-trash').click();
+      console.log('Clicked on delete button');
       await loc8.waitFor({ state: 'detached' });
+      console.log('Deleted mapping for link-from-input.iInitObj.OUT-to-objectOutput.oInitObj1D.1.IN');
 
       const loc9 = dmWebView.getByTestId('array-connector-node-objectOutput.oPrimMapFn2D.IN');
       await loc9.getByTestId('expand-array-fn-oPrimMapFn2D').click({ force: true });
+      console.log('Expanding array mapping function node for objectOutput.oPrimMapFn2D');
       const loc9I1 = dmWebView.getByTestId('array-connector-node-arrayOutput.IN');
       await loc9I1.locator('[data-testid^="expand-array-fn-"]').click({ force: true });
+      console.log('Expanding nested array mapping function node for arrayOutput');
 
       const loc9I1I1 = dmWebView.getByTestId('link-from-focusedInput.iPrimMapFn2DItemItem.OUT-to-primitiveOutput.number.IN');
       await loc9I1I1.click({ force: true });
+      console.log('Clicked on link-from-focusedInput.iPrimMapFn2DItemItem.OUT-to-primitiveOutput.number.IN');
       await dmWebView.getByTestId('expression-label-for-focusedInput.iPrimMapFn2DItemItem.OUT-to-primitiveOutput.number.IN')
         .locator('.codicon-trash').click({ force: true });
+      console.log('Clicked on delete button');
       await loc9I1I1.waitFor({ state: 'detached' });
+      console.log('Deleted mapping for link-from-focusedInput.iPrimMapFn2DItemItem.OUT-to-primitiveOutput.number.IN');
       await dm.gotoPreviousView();
+      console.log('Going back to previous view');
 
       await loc9I1.locator('.codicon-trash').click({ force: true });
+      console.log('Clicked on delete button for nested array mapping function');
       await loc9I1.waitFor({ state: 'detached' });
+      console.log('Deleted mapping for nested array mapping function');
       await dm.gotoPreviousView();
 
+      console.log('Going back to previous view');
       await loc9.locator('.codicon-trash').click({ force: true });
+      console.log('Clicked on delete button for array mapping function');
       await loc9.waitFor({ state: 'detached' });
+      console.log('Deleted mapping for array mapping function');
 
       await loc10.locator('.codicon-trash').click({ force: true });
+      console.log('Clicked on delete button for array mapping function');
       await loc10.waitFor({ state: 'detached' });
+      console.log('Deleted mapping for array mapping function');
 
       // #PAUSE_POINT
       expect(dm.verifyTsFileContent('array/del2.ts')).toBeTruthy();
@@ -506,11 +608,14 @@ export default function createTests() {
       console.log('Testing Import Options');
 
       overwriteTsFile(dmName, 'reset.ts');
+      console.log('Resetting Data Mapper to empty mappings');
 
       const projectExplorer = new ProjectExplorer(page.page);
       await projectExplorer.findItem(['Project testProject', 'Other Artifacts', 'Data Mappers', dmName], true);
+      console.log('Opened Data Mapper from Project Explorer');
       const dm = new DataMapper(page.page, dmName);
       await dm.init();
+      console.log('Initialized Data Mapper');
 
       console.log('- Load input schemas from XML');
       await dm.importSchema(IOType.Input, SchemaType.Xml, 'schemas/data.xml');
@@ -518,11 +623,13 @@ export default function createTests() {
       console.log('- Load output schemas from CSV');
       await dm.importSchema(IOType.Output, SchemaType.Csv, 'schemas/data.csv');
 
+      console.log('Verifying generated TypeScript file against expected content');
       expect(dm.verifyTsFileContent('schemas/xml-csv.ts')).toBeTruthy();
 
       console.log('- Load input schemas from XSD');
       await dm.editSchema(IOType.Input, SchemaType.Xsd, 'schemas/schema.xsd');
 
+      console.log('- Load output schemas from CSV');
       expect(dm.verifyTsFileContent('schemas/xsd-csv.ts')).toBeTruthy();
 
       console.log('Finished Testing Import Options');
