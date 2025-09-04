@@ -25,8 +25,8 @@ export class ServiceDesigner {
     constructor(private _page: Page) {
     }
 
-    public async init() {
-        const webview = await switchToIFrame("Service Designer", this._page)
+    public async init(timeout?: number) {
+        const webview = timeout ? await switchToIFrame('Service Designer', this._page, timeout) : await switchToIFrame('Service Designer', this._page);
         if (!webview) {
             throw new Error("Failed to switch to Service Designer iframe");
         }

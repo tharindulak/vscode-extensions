@@ -32,6 +32,7 @@ import { Overview } from './components/Overview';
 
 export default function createTests() {
 
+  let dmTestNo: number = 0;
   test.describe('Data Mapper Tests', {
     tag: '@group2',
   }, async () => {
@@ -46,7 +47,7 @@ export default function createTests() {
 
     async function setupDataMapper() {
       const testAttempt = test.info().retry + 1;
-      dmName = 'dm' + testAttempt;
+      dmName = `dm${testAttempt}${++dmTestNo}`;
 
       await test.step('Create new API', async () => {
 
@@ -85,7 +86,7 @@ export default function createTests() {
         console.log('Opening Service designer for Data Mapper');
 
         const serviceDesigner = new ServiceDesigner(page.page);
-        await serviceDesigner.init();
+        await serviceDesigner.init(60000);
         console.log('Initialized Service Designer');
         const resource = await serviceDesigner.resource('GET', '/');
         console.log('Clicking on resource');
@@ -334,7 +335,13 @@ export default function createTests() {
       await expect(filterItem).toContainText('Filter 1: iObjMapFn1DItem !== null');
       await dmWebView.locator('#expression-bar').waitFor();
       console.log('- Test expression bar focus');
-      const expressionBar = dmWebView.locator('#expression-bar').getByRole('textbox', { name: 'Text field' });
+      const expressionBarElement = dmWebView.locator('#expression-bar');
+      await expressionBarElement.waitFor();
+      const expressionBar = expressionBarElement.getByRole('textbox', { name: 'Text field' });
+      await expressionBar.waitFor();
+      // 2s timeout to wait until expression bar is enabled
+      await page.page.waitForTimeout(4000);
+      await expect(expressionBar).toBeEnabled();
       await expect(expressionBar).toBeFocused();
       console.log('- Clicking on canvas to defocus expression bar');
       const canvas = dmWebView.locator('#data-mapper-canvas-container');
