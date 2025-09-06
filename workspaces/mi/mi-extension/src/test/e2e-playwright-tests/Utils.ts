@@ -226,9 +226,32 @@ export function initTest(newProject: boolean = false, skipProjectCreation: boole
     test.afterEach(async ({ }, testInfo) => {
         console.log(`>>> Finished test: ${testInfo.title} with status: ${testInfo.status}, Attempt: ${testInfo.retry + 1}`);
         if (testInfo.status === 'failed') {
+            // Save screenshot on failure
             const screenshotPath = path.join(screenShotsFolder, `${testInfo.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${testInfo.retry + 1}.png`);
             await page.page.screenshot({ path: screenshotPath });
             console.log(`Screenshot saved at ${screenshotPath}`);
+            
+            // Save video on failure if available
+            const video = page.page.video();
+            if (video) {
+                try {
+                    const videoPath = path.join(videosFolder, `${testInfo.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${testInfo.retry + 1}.webm`);
+                    
+                    // Ensure videos folder exists
+                    if (!fs.existsSync(videosFolder)) {
+                        fs.mkdirSync(videosFolder, { recursive: true });
+                    }
+                    
+                    // Save the video after closing it
+                    await page.page.close();
+                    await video.saveAs(videoPath);
+                    console.log(`Video saved at ${videoPath}`);
+                } catch (error) {
+                    console.warn(`Failed to save video: ${error}`);
+                }
+            } else {
+                console.log('No video available for failed test');
+            }
         }
     });
 
