@@ -31,6 +31,7 @@ exports.default = (0, test_1.defineConfig)({
         trace: 'on-first-retry',
         screenshot: 'only-on-failure',
         video: 'retain-on-failure',
+        videoSize: { width: 1920, height: 1080 },
     },
     timeout: 1200000,
 });

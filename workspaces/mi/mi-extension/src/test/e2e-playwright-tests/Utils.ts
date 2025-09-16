@@ -42,6 +42,8 @@ async function initVSCode(groupName?: string, title?: string, attempt: number = 
     if (vscode && page) {
         await page.executePaletteCommand('Reload Window');
     } else {
+        // Don't enable interactive recorder in CI (it causes hanging)
+        // Video recording is handled by the recordVideo config in startVSCode
         vscode = await startVSCode(resourcesFolder, vscodeVersion, undefined, false, extensionsFolder, newProjectPath, 'mi-test-profile', groupName, title, attempt);
     }
     page = new ExtendedPage(await vscode!.firstWindow({ timeout: 60000 }));
@@ -114,6 +116,8 @@ export async function resumeVSCode(groupName?: string, title?: string, attempt: 
         await page.executePaletteCommand('Reload Window');
     } else {
         console.log('Starting VSCode');
+        // Don't enable interactive recorder in CI (it causes hanging)
+        // Video recording is handled by the recordVideo config in startVSCode
         vscode = await startVSCode(resourcesFolder, vscodeVersion, undefined, false, extensionsFolder, path.join(newProjectPath, 'testProject'), 'mi-test-profile', groupName, title, attempt);
         await new Promise(resolve => setTimeout(resolve, 5000));
     }
@@ -204,6 +208,12 @@ async function safeCleanup(directoryPath: string) {
 export function initTest(newProject: boolean = false, skipProjectCreation: boolean = false, cleanupAfter?: boolean, projectName?: string, runtimeVersion?: string, groupName?: string) {
     test.beforeAll(async ({ }, testInfo) => {
         console.log(`>>> Starting tests. Title: ${testInfo.title}, Attempt: ${testInfo.retry + 1}`);
+        
+        // Ensure screenshot directory exists
+        if (!fs.existsSync(screenShotsFolder)) {
+            fs.mkdirSync(screenShotsFolder, { recursive: true });
+        }
+        
         if (!existsSync(path.join(newProjectPath, projectName ?? 'testProject')) || newProject) {
             // Safely cleanup and close VS Code before removing directory
             await safeCleanup(newProjectPath);
@@ -229,6 +239,7 @@ export function initTest(newProject: boolean = false, skipProjectCreation: boole
             const screenshotPath = path.join(screenShotsFolder, `${testInfo.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${testInfo.retry + 1}.png`);
             await page.page.screenshot({ path: screenshotPath });
             console.log(`Screenshot saved at ${screenshotPath}`);
+            console.log(`Video recording automatically saved by Playwright to test-results/ directory`);
         }
     });
 

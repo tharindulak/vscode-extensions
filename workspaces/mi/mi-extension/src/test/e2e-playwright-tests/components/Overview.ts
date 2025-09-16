@@ -111,20 +111,28 @@ export class Overview {
         await saveButton.waitFor();
         await saveButton.click();
         await saveButton.waitFor({ state: 'detached' });
+        console.log("Saved the dependency");
+        const mySqlDependency = popupPanel.locator('[data-testid^="mysql-connector-java   8.0.33"]:has-text("mysql mysql-connector-java")');
+        await mySqlDependency.waitFor();
+        console.log("Located the dependency");
         const updateButton = await getVsCodeButton(this.webView, 'Update Dependencies', 'primary');
         await updateButton.waitFor();
         await updateButton.click();
         await updateButton.waitFor({ state: 'detached' });
         await popupPanel.waitFor({ state: 'detached' });
+        console.log("Closed the popup");
     }
 
     public async editOtherDependencies() {
+        console.log("Editing other dependencies");
         const manageDependency = await this.webView.waitForSelector('[id="link-external-manage-dependencies-Other\\ Dependencies"] i');
         await manageDependency.click();
         const popupPanel = this.webView.locator('#popUpPanel');
         await popupPanel.waitFor();
-        await popupPanel.locator('h2:has-text("Other Dependencies")').waitFor({ state: 'visible', timeout: 5000 });
+        await popupPanel.locator('h2:has-text("Other Dependencies")').waitFor();
+        console.log("Located the other dependencies section");
         const mySqlDependency = popupPanel.locator('[data-testid^="mysql-connector-java   8.0.33"]:has-text("mysql mysql-connector-java")');
+        console.log("Located the mysql dependency");
         await mySqlDependency.waitFor();
         await mySqlDependency.click();
         const artifactIdInput = popupPanel.getByRole('textbox', { name: 'Artifact ID*' });
@@ -155,7 +163,9 @@ export class Overview {
     }
 
     public async addConnectorDependencies() {
-        await this.webView.locator('[id="link-external-manage-dependencies-Connector\\ Dependencies"] i').click();
+        const manageDependency = this.webView.locator('[id="link-external-manage-dependencies-Connector\\ Dependencies"] i');
+        await manageDependency.waitFor();
+        await manageDependency.click();
         const popupPanel = this.webView.locator('#popUpPanel');
         await popupPanel.waitFor();
         await popupPanel.locator('h2:has-text("Connector Dependencies")').waitFor();
@@ -165,8 +175,10 @@ export class Overview {
         await this.webView.getByRole('textbox', { name: 'Version*' }).fill("2.0.3");
         const saveButton = await getVsCodeButton(this.webView, 'Save', 'primary');
         await saveButton.click();
+        await saveButton.waitFor({ state: 'detached' });
         const updateButton = await getVsCodeButton(this.webView, 'Update Dependencies', 'primary');
         await updateButton.click();
+        await updateButton.waitFor({ state: 'detached' });
         await popupPanel.waitFor({ state: 'detached' });
     }
 
