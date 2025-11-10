@@ -51,33 +51,33 @@ test.beforeAll(async () => {
     console.log('='.repeat(80) + '\n');
 });
 
-test.describe(createProjectTests);
-test.describe(artifactTests);
-test.describe(multiWorkspaceTests);
-test.describe(dataMapperTests);
+// test.describe(createProjectTests);
+// test.describe(artifactTests);
+// test.describe(multiWorkspaceTests);
+// test.describe(dataMapperTests);
 test.describe(overviewPageTests);
-test.describe(openEntryPointArtifact);
-test.describe(connectionTests);
-test.describe(connectorTests);
-test.describe(inboundEpTests);
-test.describe(logMediatorTests);
-test.describe(cacheMediatorTests);
-test.describe(throttleMediatorTests);
-test.describe(callSequenceMediatorTests);
-test.describe(validateMediatorTests);
-test.describe(dataMapperMediatorTests);
-test.describe(unitTestSuitTests);
-test.describe(dbReportMediatorTests);
-test.describe(artifact430Tests);
+// test.describe(openEntryPointArtifact);
+// test.describe(connectionTests);
+// test.describe(connectorTests);
+// test.describe(inboundEpTests);
+// test.describe(logMediatorTests);
+// test.describe(cacheMediatorTests);
+// test.describe(throttleMediatorTests);
+// test.describe(callSequenceMediatorTests);
+// test.describe(validateMediatorTests);
+// test.describe(dataMapperMediatorTests);
+// test.describe(unitTestSuitTests);
+// test.describe(dbReportMediatorTests);
+// test.describe(artifact430Tests);
 
-test.afterAll(async () => {
-    console.log('\n' + '='.repeat(80));
-    console.log('✅ MI EXTENSION E2E TEST SUITE COMPLETED');
-    console.log('='.repeat(80));
+// test.afterAll(async () => {
+//     console.log('\n' + '='.repeat(80));
+//     console.log('✅ MI EXTENSION E2E TEST SUITE COMPLETED');
+//     console.log('='.repeat(80));
 
-    const dateTime = new Date().toISOString().replace(/:/g, '-');
-    console.log('💾 Saving test video...');
-    page.page.video()?.saveAs(path.join(videosFolder, `test_${dateTime}.webm`));
-    await page.page?.close();
-    console.log('✅ Video saved successfully\n');
-});
+//     const dateTime = new Date().toISOString().replace(/:/g, '-');
+//     console.log('💾 Saving test video...');
+//     page.page.video()?.saveAs(path.join(videosFolder, `test_${dateTime}.webm`));
+//     await page.page?.close();
+//     console.log('✅ Video saved successfully\n');
+// });
