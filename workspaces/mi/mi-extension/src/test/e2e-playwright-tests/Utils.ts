@@ -204,6 +204,12 @@ export function initTest(newProject: boolean = false, skipProjectCreation: boole
             const screenshotPath = path.join(screenShotsFolder, `${testInfo.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${testInfo.retry + 1}.png`);
             await page.page.screenshot({ path: screenshotPath });
             console.log(`Screenshot saved at ${screenshotPath}`);
+            // Do the same for video
+            if (page.page.video()) {
+                const videoPath = path.join(videosFolder, `${testInfo.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${testInfo.retry + 1}.webm`);
+                await page.page.video()!.saveAs(videoPath);
+                console.log(`Video saved at ${videoPath}`);
+            }
         }
     });
 
