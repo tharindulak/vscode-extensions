@@ -263,6 +263,8 @@ export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFo
         return () => clearPendingCommits();
     }, [clearPendingCommits]);
 
+    const requestIdentity = `${request.id}|${request.method}|${request.url}|${request.name}`;
+
     const parseQueryParameters = React.useCallback((text: string): QueryParameter[] => {
         if (!text.trim()) return [];
         return text.split('\n').filter(line => line.trim()).map((line, index) => {
@@ -572,7 +574,52 @@ export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFo
         // We only resync editor text when changing the active request.
         // Per-keystroke request updates are handled by local state + debounce.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [request.id, clearPendingCommits]);
+    }, [requestIdentity, clearPendingCommits]);
+
+    React.useEffect(() => {
+        const next = padToMinLines(formatQueryParameters(request.queryParameters));
+        setQueryEditorValue(prev => {
+            if (prev === next) {
+                return prev;
+            }
+            if (queryDebounceRef.current) {
+                window.clearTimeout(queryDebounceRef.current);
+                queryDebounceRef.current = null;
+            }
+            return next;
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [request.queryParameters]);
+
+    React.useEffect(() => {
+        const next = padToMinLines(formatHeaders(request.headers));
+        setHeadersEditorValue(prev => {
+            if (prev === next) {
+                return prev;
+            }
+            if (headersDebounceRef.current) {
+                window.clearTimeout(headersDebounceRef.current);
+                headersDebounceRef.current = null;
+            }
+            return next;
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [request.headers]);
+
+    React.useEffect(() => {
+        const next = padToMinLines(getBodyEditorValue(request));
+        setBodyEditorValue(prev => {
+            if (prev === next) {
+                return prev;
+            }
+            if (bodyDebounceRef.current) {
+                window.clearTimeout(bodyDebounceRef.current);
+                bodyDebounceRef.current = null;
+            }
+            return next;
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [request.body, request.bodyFormData, request.bodyFormUrlEncoded, request.bodyBinaryFiles, bodyFormat]);
 
     React.useEffect(() => {
         if (bodyDebounceRef.current) {
