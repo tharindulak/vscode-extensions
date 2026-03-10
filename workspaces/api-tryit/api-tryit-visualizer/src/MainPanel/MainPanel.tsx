@@ -37,8 +37,6 @@ import CollectionForm from '../CollectionForm/CollectionForm';
 import { getVSCodeAPI } from '../utils/vscode-api';
 import { getMethodBgColor } from '../utils/methods';
 import { HurlRunFileView, HurlRunResults } from '../Output';
-import { NotebookView } from '../NoteBook';
-import type { NotebookViewState, NotebookOpenPayload, NotebookCellResult } from '../NoteBook';
 
 const METHODS_WITHOUT_BODY = new Set(['GET', 'HEAD', 'OPTIONS', 'DELETE']);
 
@@ -626,7 +624,6 @@ export const MainPanel: React.FC = () => {
     // Response produced in the current session (by clicking Send). Separate from requestItem.response
     // which may carry a stale stored response loaded from the hurl file.
     const [sessionResponse, setSessionResponse] = useState<ApiResponse | undefined>();
-    const [notebookState, setNotebookState] = useState<NotebookViewState | undefined>();
     const selectedIdentityRef = useRef('');
     const savedSnapshotRef = useRef('');
     const currentSnapshotRef = useRef('');
@@ -707,28 +704,6 @@ export const MainPanel: React.FC = () => {
 				errorMessage: payload.message
 			}));
 		},
-		onHurlNotebookOpened: (payload: NotebookOpenPayload) => {
-			setShowCollectionForm(false);
-			setRunViewState(undefined);
-			setNotebookState({
-				title: payload.title,
-				cells: payload.cells,
-				results: {},
-				runningCells: new Set()
-			});
-		},
-		onNotebookCellResult: (result: NotebookCellResult) => {
-			setNotebookState(previous => {
-				if (!previous) return previous;
-				const nextRunning = new Set(previous.runningCells);
-				nextRunning.delete(result.cellIndex);
-				return {
-					...previous,
-					runningCells: nextRunning,
-					results: { ...previous.results, [result.cellIndex]: result }
-				};
-			});
-		}
     });
 
     const handleCloseCollectionForm = () => {
@@ -856,45 +831,6 @@ export const MainPanel: React.FC = () => {
             pendingSaveSnapshotRef.current = null;
             console.error('Error saving request:', error);
         }
-    };
-
-    const handleRunNotebookCell = (cellIndex: number, content: string) => {
-        const vscode = getVSCodeAPI();
-        if (!vscode || !notebookState) return;
-
-        // Mark the cell as running
-        setNotebookState(previous => {
-            if (!previous) return previous;
-            const nextRunning = new Set(previous.runningCells);
-            nextRunning.add(cellIndex);
-            return { ...previous, runningCells: nextRunning };
-        });
-
-        const requestId = `notebook-cell-${cellIndex}-${Date.now()}`;
-
-        // Set up a one-time listener for the result
-        const messageHandler = (event: MessageEvent) => {
-            const { type, requestId: responseId, data } = event.data;
-            if (type === 'notebookCellResult' && responseId === requestId) {
-                window.removeEventListener('message', messageHandler);
-                // The result is also handled by useExtensionMessages, but we emit
-                // with requestId so only this listener fires for this specific call.
-            }
-        };
-        window.addEventListener('message', messageHandler);
-
-        vscode.postMessage({ type: 'runNotebookCell', requestId, data: { cellIndex, content } });
-
-        // Safety timeout — remove the cell from running state after 60s if no result arrives
-        setTimeout(() => {
-            window.removeEventListener('message', messageHandler);
-            setNotebookState(previous => {
-                if (!previous || !previous.runningCells.has(cellIndex)) return previous;
-                const nextRunning = new Set(previous.runningCells);
-                nextRunning.delete(cellIndex);
-                return { ...previous, runningCells: nextRunning };
-            });
-        }, 60_000);
     };
 
     const isDirty = Boolean(requestItem) && currentSnapshot !== savedSnapshot;
@@ -1110,13 +1046,7 @@ export const MainPanel: React.FC = () => {
             </HeaderBar>
 
             <Content>
-				{notebookState ? (
-					<NotebookView
-						state={notebookState}
-						onRunCell={handleRunNotebookCell}
-						onClose={() => setNotebookState(undefined)}
-					/>
-				) : runViewState ? (
+				{runViewState ? (
 					<HurlRunResults
 						context={runViewState.context}
 						status={runViewState.status}

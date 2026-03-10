@@ -28,9 +28,7 @@ import { registerApiTryItRpcHandlers, ApiTryItRpcManager } from '../rpc-managers
 import { ApiExplorerProvider } from '../tree-view/ApiExplorerProvider';
 import { parseHurlDocument, parseHurlCollection } from '@wso2/api-tryit-hurl-parser';
 import { getPendingBiSavePath, getPendingBiCollectionName, clearPendingBiSavePath, setActiveCollectionFilePath, getActiveCollectionFilePath } from '../bi-save-context';
-import { createHurlRunner } from '@wso2/api-tryit-hurl-runner';
 import { getHurlBinaryManager } from '../hurl/hurl-binary-manager';
-import * as os from 'os';
 
 export class TryItPanel {
 	public static currentPanel: TryItPanel | undefined;
@@ -219,57 +217,6 @@ export class TryItPanel {
 						} catch (error: unknown) {
 							const errorMsg = error instanceof Error ? error.message : 'Unknown error';
 							vscode.window.showErrorMessage(`Failed to import Hurl collection: ${errorMsg}`);
-						}
-						break;
-				case 'runNotebookCell':
-						// Execute a single Hurl request block from the notebook webview.
-						// Writes the cell content to a temp file, runs it with hurl-runner,
-						// and posts 'notebookCellResult' back to the webview.
-						try {
-							const { requestId } = message;
-							const { cellIndex, content } = message.data || {};
-							const commandPath = await getHurlBinaryManager().resolveCommandPath({ promptOnFailure: true });
-							const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'hurl-notebook-'));
-							const tempFile = path.join(tempDir, 'cell.hurl');
-							await fs.writeFile(tempFile, content, 'utf-8');
-
-							const runner = createHurlRunner();
-							const result = await runner.run(
-								{ collectionPath: tempDir, includePatterns: ['cell.hurl'] },
-								{ commandPath, includeResponseOutput: true, continueOnError: true }
-							);
-							await fs.rm(tempDir, { recursive: true, force: true }).catch(() => undefined);
-
-							const fileResult = result.files[0];
-							this._panel.webview.postMessage({
-								type: 'notebookCellResult',
-								requestId,
-								data: {
-									cellIndex,
-									status: fileResult?.status ?? 'error',
-									durationMs: fileResult?.durationMs ?? 0,
-									entries: fileResult?.entries ?? [],
-									assertions: fileResult?.assertions ?? [],
-									errorMessage: fileResult?.errorMessage,
-									stderr: fileResult?.stderr,
-									stdout: fileResult?.stdout
-								}
-							});
-						} catch (error: unknown) {
-							const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-							const { requestId } = message;
-							this._panel.webview.postMessage({
-								type: 'notebookCellResult',
-								requestId,
-								data: {
-									cellIndex: message.data?.cellIndex ?? -1,
-									status: 'error',
-									durationMs: 0,
-									entries: [],
-									assertions: [],
-									errorMessage: errorMsg
-								}
-							});
 						}
 						break;
 				case 'sendHttpRequest':

@@ -29,7 +29,6 @@ import * as fs from 'fs/promises';
 import * as yaml from 'js-yaml';
 import { getHurlBinaryManager, initializeHurlBinaryManager } from './hurl/hurl-binary-manager';
 import { setPendingBiSavePath, getActiveCollectionFilePath, setActiveCollectionFilePath } from './bi-save-context';
-import { activateHurlNotebook, hurlTextToNotebookData, HURL_NOTEBOOK_TYPE } from './notebook';
 
 const PENDING_HURL_IMPORT_KEY = 'api-tryit.pendingHurlImportContext';
 
@@ -359,7 +358,6 @@ async function createHurlCollectionFolderStructure(
 
 export async function activate(context: vscode.ExtensionContext) {
 	initializeHurlBinaryManager(context);
-	activateHurlNotebook(context);
 
 	// Register the API Explorer tree view provider
 	const apiExplorerProvider = new ApiExplorerProvider();
@@ -1540,68 +1538,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		await apiExplorerProvider.reloadCollections();
 	});
 
-	// Open Hurl Notebook — lets users open a .hurl file (or paste content) as a notebook
-	// where each request block becomes an executable cell.
-	const openHurlNotebookCommand = vscode.commands.registerCommand('api-tryit.openHurlNotebook', async () => {
-		try {
-			let hurlContent: string | undefined;
-
-			// Option A: file picker for .hurl files
-			const fileUris = await vscode.window.showOpenDialog({
-				canSelectFiles: true,
-				canSelectFolders: false,
-				canSelectMany: false,
-				filters: { 'Hurl Files': ['hurl'], 'All Files': ['*'] },
-				openLabel: 'Open as Hurl Notebook',
-				title: 'Open Hurl Notebook'
-			});
-
-			if (fileUris && fileUris.length > 0) {
-				const raw = await vscode.workspace.fs.readFile(fileUris[0]);
-				hurlContent = Buffer.from(raw).toString('utf-8');
-			} else {
-				// Option B (fallback): paste Hurl content directly
-				hurlContent = await vscode.window.showInputBox({
-					prompt: 'Paste Hurl file content to open as a notebook',
-					placeHolder: 'GET https://example.com\nHTTP 200',
-					title: 'Open Hurl Notebook',
-					ignoreFocusOut: true
-				});
-			}
-
-			if (!hurlContent || !hurlContent.trim()) {
-				return;
-			}
-
-			// Build the payload for the webview notebook view.
-			const { parseHurlDocument: parseDoc } = await import('@wso2/api-tryit-hurl-parser');
-			const { blocks } = parseDoc(hurlContent);
-			const cells = blocks.map((block, idx) => ({
-				index: idx,
-				name: block.name,
-				method: block.method,
-				url: block.url,
-				content: block.text
-			}));
-
-			// Determine a display title (first line @collectionName or fallback).
-			const titleMatch = hurlContent.match(/^#\s*@collectionName\s+(.+)$/im);
-			const title = titleMatch?.[1]?.trim() || 'Hurl Notebook';
-
-			// Show the notebook in the MainPanel webview.
-			TryItPanel.show(context);
-			TryItPanel.postMessage('openHurlNotebook', { title, cells });
-
-			// Also open as a VS Code notebook for users who prefer that experience.
-			const notebookData = hurlTextToNotebookData(hurlContent);
-			const notebook = await vscode.workspace.openNotebookDocument(HURL_NOTEBOOK_TYPE, notebookData);
-			await vscode.window.showNotebookDocument(notebook);
-		} catch (error) {
-			const message = error instanceof Error ? error.message : String(error);
-			vscode.window.showErrorMessage(`Failed to open Hurl Notebook: ${message}`);
-		}
-	});
-
 	const installHurlCommand = vscode.commands.registerCommand('api-tryit.installHurl', async () => {
 		try {
 			const binaryPath = await getHurlBinaryManager().installManagedHurl({ interactive: true, force: true });
@@ -1632,7 +1568,6 @@ export async function activate(context: vscode.ExtensionContext) {
 			settingsCommand,
 			clearSelectionCommand,
 			installHurlCommand,
-			openHurlNotebookCommand,
 		);
 }
 

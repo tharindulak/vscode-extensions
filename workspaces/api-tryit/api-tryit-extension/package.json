@@ -39,17 +39,6 @@
         }
       ]
     },
-    "notebooks": [
-      {
-        "type": "api-tryit-hurl-notebook",
-        "displayName": "Hurl Notebook",
-        "selector": [
-          {
-            "filenamePattern": "*.hurlnb"
-          }
-        ]
-      }
-    ],
     "commands": [
       {
         "command": "api-tryit.openTryIt",
@@ -129,11 +118,6 @@
         "command": "api-tryit.importCollectionPayload",
         "title": "API TryIt: Import Collection Payload",
         "icon": "$(add)"
-      },
-      {
-        "command": "api-tryit.openHurlNotebook",
-        "title": "API TryIt: Open Hurl Notebook",
-        "icon": "$(notebook)"
       }
     ],
     "menus": {
@@ -193,9 +177,6 @@
         },
         {
           "command": "api-tryit.installHurl"
-        },
-        {
-          "command": "api-tryit.openHurlNotebook"
         }
       ]
     },
