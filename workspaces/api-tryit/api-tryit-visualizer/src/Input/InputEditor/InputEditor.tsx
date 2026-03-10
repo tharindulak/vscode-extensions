@@ -211,6 +211,8 @@ export const InputEditor: React.FC<InputEditorProps> = ({
     const bodyFormatRef = useRef(bodyFormat);
     const lastPropValueRef = useRef(value);
     const isProgrammaticUpdateRef = useRef(false);
+    const typingTimeoutRef = useRef<number | null>(null);
+    const pendingPropValueRef = useRef<string | null>(null);
     const previousBodyFormatRef = useRef(bodyFormat);
     const suggestionsKeyRef = useRef<string>(serializeSuggestions(suggestions));
 
@@ -1049,6 +1051,42 @@ export const InputEditor: React.FC<InputEditorProps> = ({
         lastSuggestionContextRef.current = { line: lineNumber, section: sectionType };
     }, []);
 
+    const applyEditorValue = useCallback((nextValue: string) => {
+        if (!editorRef.current) {
+            return;
+        }
+
+        const currentValue = editorRef.current.getValue();
+        if (currentValue === nextValue) {
+            pendingPropValueRef.current = null;
+            return;
+        }
+
+        const selection = editorRef.current.getSelection();
+        const viewState = editorRef.current.saveViewState();
+
+        isProgrammaticUpdateRef.current = true;
+        editorRef.current.setValue(nextValue);
+        isProgrammaticUpdateRef.current = false;
+
+        const model = editorRef.current.getModel();
+        if (selection && model) {
+            const normalizedSelection = new monaco.Selection(
+                Math.min(selection.selectionStartLineNumber, model.getLineCount()),
+                Math.min(selection.selectionStartColumn, model.getLineMaxColumn(Math.min(selection.selectionStartLineNumber, model.getLineCount()))),
+                Math.min(selection.positionLineNumber, model.getLineCount()),
+                Math.min(selection.positionColumn, model.getLineMaxColumn(Math.min(selection.positionLineNumber, model.getLineCount())))
+            );
+            editorRef.current.setSelection(normalizedSelection);
+        }
+
+        if (viewState) {
+            editorRef.current.restoreViewState(viewState);
+        }
+
+        pendingPropValueRef.current = null;
+    }, []);
+
     useEffect(() => {
         const nextSuggestionsKey = serializeSuggestions(suggestions);
         const suggestionsChanged = nextSuggestionsKey !== suggestionsKeyRef.current;
@@ -1123,23 +1161,17 @@ export const InputEditor: React.FC<InputEditorProps> = ({
 
         lastPropValueRef.current = value;
 
-        if (editorRef.current && !isTypingRef.current) {
-            const currentValue = editorRef.current.getValue();
-            // Only update if content is actually different
-            if (currentValue !== value) {
-                const position = editorRef.current.getPosition();
-                isProgrammaticUpdateRef.current = true;
-                editorRef.current.setValue(value);
-                isProgrammaticUpdateRef.current = false;
-                if (position) {
-                    const model = editorRef.current.getModel();
-                    if (model && position.lineNumber <= model.getLineCount()) {
-                        editorRef.current.setPosition(position);
-                    }
-                }
-            }
+        if (!editorRef.current) {
+            return;
         }
-    }, [value]);
+
+        if (isTypingRef.current && editorRef.current.hasTextFocus()) {
+            pendingPropValueRef.current = value;
+            return;
+        }
+
+        applyEditorValue(value);
+    }, [applyEditorValue, value]);
 
     /**
      * Handles changes to the editor content
@@ -1148,28 +1180,21 @@ export const InputEditor: React.FC<InputEditorProps> = ({
         if (newValue !== undefined && !isProgrammaticUpdateRef.current) {
             isTypingRef.current = true;
             onChange(newValue);
-            // Reset typing flag after a short delay, then sync editor to prop value
-            // (e.g. to apply trailing empty-line padding that the parent adds)
-            setTimeout(() => {
+
+            if (typingTimeoutRef.current) {
+                window.clearTimeout(typingTimeoutRef.current);
+            }
+
+            typingTimeoutRef.current = window.setTimeout(() => {
                 isTypingRef.current = false;
-                if (editorRef.current) {
-                    const propValue = lastPropValueRef.current;
-                    const currentEditorValue = editorRef.current.getValue();
-                    if (propValue !== undefined && currentEditorValue !== propValue) {
-                        const position = editorRef.current.getPosition();
-                        isProgrammaticUpdateRef.current = true;
-                        editorRef.current.setValue(propValue);
-                        isProgrammaticUpdateRef.current = false;
-                        // Restore cursor so typing continues from the same position
-                        if (position) {
-                            const model = editorRef.current.getModel();
-                            if (model && position.lineNumber <= model.getLineCount()) {
-                                editorRef.current.setPosition(position);
-                            }
-                        }
-                    }
+
+                const pendingPropValue = pendingPropValueRef.current;
+                if (pendingPropValue !== null) {
+                    applyEditorValue(pendingPropValue);
                 }
-            }, 100);
+
+                typingTimeoutRef.current = null;
+            }, 180);
         }
     };
 
@@ -1194,6 +1219,10 @@ export const InputEditor: React.FC<InputEditorProps> = ({
             }
             if (mouseDownListenerDisposableRef.current) {
                 mouseDownListenerDisposableRef.current.dispose();
+            }
+            if (typingTimeoutRef.current) {
+                window.clearTimeout(typingTimeoutRef.current);
+                typingTimeoutRef.current = null;
             }
         };
     }, []);

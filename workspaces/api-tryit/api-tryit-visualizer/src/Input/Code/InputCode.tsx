@@ -26,12 +26,24 @@ type BodyFormat = 'json' | 'xml' | 'text' | 'html' | 'javascript' | 'form-data' 
 type InlineSeparator = ':' | '=';
 
 const SEPARATOR_META_MARKER = '__sep__';
+const SEPARATOR_SPACING_META_MARKER = '__sep_space__';
 
-const withSeparatorMeta = (baseId: string, separator?: InlineSeparator): string => {
-    if (!separator) {
-        return baseId;
+const withSeparatorMeta = (
+    baseId: string,
+    separator?: InlineSeparator,
+    hasSpaceAfterSeparator?: boolean
+): string => {
+    let metaId = baseId;
+
+    if (separator) {
+        metaId += `${SEPARATOR_META_MARKER}${separator === ':' ? 'colon' : 'equals'}`;
     }
-    return `${baseId}${SEPARATOR_META_MARKER}${separator === ':' ? 'colon' : 'equals'}`;
+
+    if (hasSpaceAfterSeparator !== undefined) {
+        metaId += `${SEPARATOR_SPACING_META_MARKER}${hasSpaceAfterSeparator ? 'spaced' : 'compact'}`;
+    }
+
+    return metaId;
 };
 
 const getSeparatorFromMeta = (id: string | undefined, fallback?: InlineSeparator): InlineSeparator | undefined => {
@@ -43,6 +55,19 @@ const getSeparatorFromMeta = (id: string | undefined, fallback?: InlineSeparator
     }
     if (id.includes(`${SEPARATOR_META_MARKER}colon`)) {
         return ':';
+    }
+    return fallback;
+};
+
+const getHasSpaceAfterSeparatorFromMeta = (id: string | undefined, fallback = false): boolean => {
+    if (!id) {
+        return fallback;
+    }
+    if (id.includes(`${SEPARATOR_SPACING_META_MARKER}spaced`)) {
+        return true;
+    }
+    if (id.includes(`${SEPARATOR_SPACING_META_MARKER}compact`)) {
+        return false;
     }
     return fallback;
 };
@@ -175,9 +200,16 @@ export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFo
     const formatMenuRef = React.useRef<HTMLDivElement>(null);
     const methodSupportsBody = !['GET', 'HEAD', 'OPTIONS', 'DELETE'].includes((request.method || '').toUpperCase());
     const requestRef = React.useRef(request);
+    const queryEditorRef = React.useRef<any>(null);
+    const headersEditorRef = React.useRef<any>(null);
+    const bodyEditorRef = React.useRef<any>(null);
     const queryDebounceRef = React.useRef<number | null>(null);
     const headersDebounceRef = React.useRef<number | null>(null);
     const bodyDebounceRef = React.useRef<number | null>(null);
+
+    const hasEditorFocus = React.useCallback((editorRef: React.MutableRefObject<any>) => {
+        return Boolean(editorRef.current?.hasTextFocus?.());
+    }, []);
 
     React.useEffect(() => {
         requestRef.current = request;
@@ -201,16 +233,17 @@ export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFo
                 const key = (p.key || '').trim();
                 const value = p.value ?? '';
                 const separator = getSeparatorFromMeta(p.id, value.length > 0 ? ':' : undefined);
+                const hasSpaceAfterSeparator = getHasSpaceAfterSeparatorFromMeta(p.id, separator === ':');
 
                 if (!key) {
                     return value;
                 }
 
                 if (value.length > 0) {
-                    return separator === '=' ? `${key}=${value}` : `${key}: ${value}`;
+                    return `${key}${separator}${hasSpaceAfterSeparator ? ' ' : ''}${value}`;
                 }
 
-                return separator ? `${key}${separator}` : key;
+                return separator ? `${key}${separator}${hasSpaceAfterSeparator ? ' ' : ''}` : key;
             })
             .join('\n');
     };
@@ -223,13 +256,14 @@ export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFo
                 const key = (h.key || '').trim();
                 const value = h.value ?? '';
                 const hasExplicitSeparator = getSeparatorFromMeta(h.id, undefined) === ':';
+                const hasSpaceAfterSeparator = getHasSpaceAfterSeparatorFromMeta(h.id, true);
                 if (!key) {
                     return value;
                 }
                 if (value.length > 0) {
-                    return `${key}: ${value}`;
+                    return `${key}:${hasSpaceAfterSeparator ? ' ' : ''}${value}`;
                 }
-                return hasExplicitSeparator ? `${key}:` : key;
+                return hasExplicitSeparator ? `${key}:${hasSpaceAfterSeparator ? ' ' : ''}` : key;
             })
             .join('\n');
     };
@@ -286,10 +320,11 @@ export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFo
                 return { id: Date.now().toString() + index, key: line.trim(), value: '' };
             }
             const key = line.slice(0, separatorIndex).trim();
-            const paramValue = line.slice(separatorIndex + 1).trim();
+            const rawParamValue = line.slice(separatorIndex + 1);
+            const paramValue = rawParamValue.trim();
             const separator: InlineSeparator = line[separatorIndex] === '=' ? '=' : ':';
             return {
-                id: withSeparatorMeta(Date.now().toString() + index, separator),
+                id: withSeparatorMeta(Date.now().toString() + index, separator, /^\s+/.test(rawParamValue)),
                 key: key || '',
                 value: paramValue || ''
             };
@@ -304,9 +339,10 @@ export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFo
                 return { id: Date.now().toString() + index, key: line.trim(), value: '' };
             }
             const key = line.slice(0, separatorIndex).trim();
-            const headerValue = line.slice(separatorIndex + 1).trim();
+            const rawHeaderValue = line.slice(separatorIndex + 1);
+            const headerValue = rawHeaderValue.trim();
             return {
-                id: withSeparatorMeta(Date.now().toString() + index, ':'),
+                id: withSeparatorMeta(Date.now().toString() + index, ':', /^\s+/.test(rawHeaderValue)),
                 key: key || '',
                 value: headerValue || ''
             };
@@ -582,6 +618,9 @@ export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFo
             if (prev === next) {
                 return prev;
             }
+            if (hasEditorFocus(queryEditorRef)) {
+                return prev;
+            }
             if (queryDebounceRef.current) {
                 window.clearTimeout(queryDebounceRef.current);
                 queryDebounceRef.current = null;
@@ -589,12 +628,15 @@ export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFo
             return next;
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [request.queryParameters]);
+    }, [request.queryParameters, hasEditorFocus]);
 
     React.useEffect(() => {
         const next = padToMinLines(formatHeaders(request.headers));
         setHeadersEditorValue(prev => {
             if (prev === next) {
+                return prev;
+            }
+            if (hasEditorFocus(headersEditorRef)) {
                 return prev;
             }
             if (headersDebounceRef.current) {
@@ -604,12 +646,15 @@ export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFo
             return next;
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [request.headers]);
+    }, [request.headers, hasEditorFocus]);
 
     React.useEffect(() => {
         const next = padToMinLines(getBodyEditorValue(request));
         setBodyEditorValue(prev => {
             if (prev === next) {
+                return prev;
+            }
+            if (hasEditorFocus(bodyEditorRef)) {
                 return prev;
             }
             if (bodyDebounceRef.current) {
@@ -619,7 +664,7 @@ export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFo
             return next;
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [request.body, request.bodyFormData, request.bodyFormUrlEncoded, request.bodyBinaryFiles, bodyFormat]);
+    }, [request.body, request.bodyFormData, request.bodyFormUrlEncoded, request.bodyBinaryFiles, bodyFormat, hasEditorFocus]);
 
     React.useEffect(() => {
         if (bodyDebounceRef.current) {
@@ -643,7 +688,7 @@ export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFo
                 setTimeout(() => {
                     editor.setPosition({ lineNumber, column: 1 });
                     editor.focus();
-                    addGhostTextDecoration(editor, model, lineNumber, 'key: value');
+                    addGhostTextDecoration(editor, model, lineNumber, 'key:value');
                 }, 0);
             }
         },
@@ -672,7 +717,7 @@ export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFo
                 setTimeout(() => {
                     editor.setPosition({ lineNumber, column: 1 });
                     editor.focus();
-                    addGhostTextDecoration(editor, model, lineNumber, 'Content-Type: application/json');
+                    addGhostTextDecoration(editor, model, lineNumber, 'Content-Type:application/json');
                 }, 0);
             }
         },
@@ -711,7 +756,7 @@ export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFo
                         setTimeout(() => {
                             editor.setPosition({ lineNumber, column: 1 });
                             editor.focus();
-                            addGhostTextDecoration(editor, model, lineNumber, 'key: value');
+                            addGhostTextDecoration(editor, model, lineNumber, 'key:value');
                         }, 0);
                     } else if (bodyFormat === 'form-data') {
                         const { value: newValue, lineNumber } = insertAfterLastContent(model.getValue(), '');
@@ -719,7 +764,7 @@ export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFo
                         setTimeout(() => {
                             editor.setPosition({ lineNumber, column: 1 });
                             editor.focus();
-                            addGhostTextDecoration(editor, model, lineNumber, 'key: value');
+                            addGhostTextDecoration(editor, model, lineNumber, 'key:value');
                         }, 0);
                     } else {
                         const sampleBody = '{\n  "key": "value"\n}';
@@ -823,6 +868,9 @@ export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFo
             <InputEditor
                 minHeight='calc((100vh - 420px) / 3)'
                 onChange={handleQueryParametersChange}
+                onMount={(editor) => {
+                    queryEditorRef.current = editor;
+                }}
                 value={queryEditorValue}
                 codeLenses={queryParamsCodeLenses}
                 suggestions={{ queryKeys: COMMON_QUERY_KEYS }}
@@ -832,6 +880,9 @@ export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFo
             <InputEditor
                 minHeight='calc((100vh - 420px) / 3)'
                 onChange={handleHeadersChange}
+                onMount={(editor) => {
+                    headersEditorRef.current = editor;
+                }}
                 value={headersEditorValue}
                 codeLenses={headersCodeLenses}
                 suggestions={{ headers: COMMON_HEADERS }}
@@ -868,6 +919,9 @@ export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFo
                         key={`body-editor-${bodyFormat}`}
                         minHeight='calc((100vh - 420px) / 3)'
                         onChange={handleBodyChange}
+                        onMount={(editor) => {
+                            bodyEditorRef.current = editor;
+                        }}
                         value={bodyEditorValue}
                         codeLenses={bodyCodeLenses}
                         suggestions={{ bodySnippets: COMMON_BODY_SNIPPETS }}

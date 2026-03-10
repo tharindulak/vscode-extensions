@@ -82,6 +82,60 @@ const getItemIdentity = (item?: ApiRequestItem): string => {
     return `${item.id || ''}::${item.filePath || ''}`;
 };
 
+type InlineParameterMetaCarrier = {
+    id: string;
+    key: string;
+    value: string;
+};
+
+const mergeInlineParameterIds = <T extends InlineParameterMetaCarrier>(
+    previousParams: T[] | undefined,
+    nextParams: T[] | undefined
+): T[] => {
+    if (!Array.isArray(nextParams) || nextParams.length === 0) {
+        return nextParams || [];
+    }
+
+    if (!Array.isArray(previousParams) || previousParams.length === 0) {
+        return nextParams;
+    }
+
+    const previousIdsBySignature = new Map<string, string[]>();
+    previousParams.forEach(param => {
+        const signature = `${param.key}\u0000${param.value}`;
+        const ids = previousIdsBySignature.get(signature) || [];
+        ids.push(param.id);
+        previousIdsBySignature.set(signature, ids);
+    });
+
+    return nextParams.map(param => {
+        const signature = `${param.key}\u0000${param.value}`;
+        const matchingIds = previousIdsBySignature.get(signature);
+
+        if (!matchingIds || matchingIds.length === 0) {
+            return param;
+        }
+
+        const preservedId = matchingIds.shift();
+        return preservedId ? { ...param, id: preservedId } : param;
+    });
+};
+
+const preserveInlineFormattingMeta = (previousItem: ApiRequestItem | undefined, nextItem: ApiRequestItem): ApiRequestItem => {
+    if (!previousItem?.request) {
+        return nextItem;
+    }
+
+    return {
+        ...nextItem,
+        request: {
+            ...nextItem.request,
+            queryParameters: mergeInlineParameterIds(previousItem.request.queryParameters, nextItem.request.queryParameters),
+            headers: mergeInlineParameterIds(previousItem.request.headers, nextItem.request.headers)
+        }
+    };
+};
+
 const createSaveSnapshot = (item?: ApiRequestItem): string => {
     if (!item?.request) {
         return '';
@@ -590,7 +644,11 @@ export const MainPanel: React.FC = () => {
         onApiRequestSelected: (item) => {
             const incomingIdentity = getItemIdentity(item);
             const selectedItemChanged = incomingIdentity !== selectedIdentityRef.current;
+            const previousItem = latestRequestItemRef.current;
             selectedIdentityRef.current = incomingIdentity;
+            const nextItem = !selectedItemChanged
+                ? preserveInlineFormattingMeta(previousItem, item)
+                : item;
 
             // Only clear session response when the user selects a different request,
             // not when the same item is refreshed after a save.
@@ -598,17 +656,17 @@ export const MainPanel: React.FC = () => {
                 setRunViewState(undefined);
                 setSessionResponse(undefined);
             }
-            setRequestItem(item);
-            latestRequestItemRef.current = item;
-            setTempName(item.name);
+            setRequestItem(nextItem);
+            latestRequestItemRef.current = nextItem;
+            setTempName(nextItem.name);
             setIsEditingName(false);
             // Close collection form when a request is selected
             setShowCollectionForm(false);
             if (selectedItemChanged || !savedSnapshotRef.current || expectSavedSelectionRefreshRef.current) {
-                const snapshot = createSaveSnapshot(item);
+                const snapshot = createSaveSnapshot(nextItem);
                 // In-memory items have no filePath — treat them as unsaved so Save is
                 // enabled immediately without requiring the user to make a change first.
-                const savedSnap = item.filePath ? snapshot : '';
+                const savedSnap = nextItem.filePath ? snapshot : '';
                 savedSnapshotRef.current = savedSnap;
                 setSavedSnapshot(savedSnap);
                 pendingSaveSnapshotRef.current = null;
@@ -1019,8 +1077,8 @@ export const MainPanel: React.FC = () => {
                                     <Codicon sx={{height: 'unset', width: 'unset'}} iconSx={{fontSize: 22, marginTop: 4}} name="question" />
                                     <HelpTooltip show={showHelp}>
                                         <strong>Write your request with auto-completions:</strong><br/>
-                                        • <CodeHint>key: value</CodeHint> for query parameters<br/>
-                                        • <CodeHint>Header-Name: value</CodeHint> for headers<br/>
+                                        • <CodeHint>key:value</CodeHint> or <CodeHint>key: value</CodeHint> for query parameters<br/>
+                                        • <CodeHint>Header-Name:value</CodeHint> or <CodeHint>Header-Name: value</CodeHint> for headers<br/>
                                         • Press <CodeHint>Cmd+Space</CodeHint> or <CodeHint>Cmd+/</CodeHint> for suggestions
                                     </HelpTooltip>
                                 </HelpButton>
