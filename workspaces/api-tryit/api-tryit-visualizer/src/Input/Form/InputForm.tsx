@@ -37,6 +37,7 @@ const BodyTitleWrapper = styled.div`
     align-items: center;
     gap: 8px;
     flex: 1;
+    cursor: pointer;
 `;
 const FormatSelectorWrapper = styled.div`
     position: relative;
@@ -106,7 +107,6 @@ const FormatOption = styled.div<{ isSelected: boolean }>`
 const Section = styled.div`
 `;
 const AddButtonWrapper = styled.div`
-    margin-top: 8px;
     margin-left: 0;
 `;
 const ParamList = styled.div`
@@ -114,6 +114,8 @@ const ParamList = styled.div`
     flex-direction: column;
     width: 600px;
 `;
+
+const SectionHeader = styled.div`display:flex;align-items:center;gap:5px;cursor:pointer`;
 
 const NoBodyMessage = styled.div`
     padding-left: 4px;
@@ -135,6 +137,9 @@ type BodyFormat = 'json' | 'xml' | 'text' | 'html' | 'javascript' | 'form-data' 
 
 export const InputForm: React.FC<InputFormProps> = ({ request, onRequestChange, bodyFormat, updateFormDataParamContentType, handleFileSelect, onFormatChange }) => {
     const [formatOpen, setFormatOpen] = React.useState(false);
+    const [queryCollapsed, setQueryCollapsed] = React.useState(false);
+    const [headersCollapsed, setHeadersCollapsed] = React.useState(false);
+    const [bodyCollapsed, setBodyCollapsed] = React.useState(false);
     const formatRef = React.useRef<HTMLDivElement>(null);
     const methodSupportsBody = !['GET', 'HEAD', 'OPTIONS', 'DELETE'].includes((request.method || '').toUpperCase());
 
@@ -266,45 +271,60 @@ export const InputForm: React.FC<InputFormProps> = ({ request, onRequestChange, 
         <>
             {/* Query Parameters Section */}
             <Section>
-                <Typography variant="h3" sx={{ margin: '4px 0px 4px 0px', fontWeight: 'lighter' }}>Query Parameters</Typography>
-                <ParamList>
-                    {(request.queryParameters || []).map((param, id) => (
-                        <ParamItem id={`${id}`} key={param.id} keyValue={param.key} value={param.value} onKeyChange={(key) => updateQueryParam(param.id, key, param.value)} onValueChange={(value) => updateQueryParam(param.id, param.key, value)} onDelete={() => deleteQueryParam(param.id)} />
-                    ))}
-                </ParamList>
-                <AddButtonWrapper>
-                    <LinkButton sx={{ color: 'inherit', '&:hover': { color: 'var(--vscode-button-hoverBackground)' } }} onClick={addQueryParam}><Codicon name="add" />Query Parameter</LinkButton>
-                </AddButtonWrapper>
+                <SectionHeader onClick={() => setQueryCollapsed(!queryCollapsed)}>
+                    <Codicon name={queryCollapsed ? 'chevron-right' : 'chevron-down'} />
+                    <Typography variant="h3" sx={{ fontWeight: 'lighter' }}>Query Parameters</Typography>
+                </SectionHeader>
+                {!queryCollapsed && (
+                    <div style={{ marginLeft: 4 }}>
+                        <ParamList>
+                            {(request.queryParameters || []).map((param, id) => (
+                                <ParamItem id={`${id}`} key={param.id} keyValue={param.key} value={param.value} onKeyChange={(key) => updateQueryParam(param.id, key, param.value)} onValueChange={(value) => updateQueryParam(param.id, param.key, value)} onDelete={() => deleteQueryParam(param.id)} />
+                            ))}
+                        </ParamList>
+                        <AddButtonWrapper>
+                            <LinkButton sx={{ color: 'inherit', '&:hover': { color: 'var(--vscode-button-hoverBackground)' } }} onClick={addQueryParam}><Codicon name="add" />Query Parameter</LinkButton>
+                        </AddButtonWrapper>
+                    </div>
+                )}
             </Section>
 
             {/* Headers Section */}
             <Section>
-                <Typography variant="h3" sx={{ margin: '12px 0px 2px 0px', fontWeight: 'lighter' }}>Headers</Typography>
-                <ParamList>
-                    {(request.headers || []).map((header, id) => (
-                        <ParamItem
-                            id={`${id}`}
-                            key={header.id}
-                            keyValue={header.key}
-                            value={header.value}
-                            onKeyChange={(key) => updateHeader(header.id, key, header.value)}
-                            onValueChange={(value) => updateHeader(header.id, header.key, value)}
-                            onDelete={() => deleteHeader(header.id)}
-                            keyItems={COMMON_HEADERS.map(h => h.name)}
-                            valueItems={header.key ? (COMMON_HEADERS.find(h => h.name === header.key)?.values || []) : []}
-                        />
-                    ))}
-                </ParamList>
-                <AddButtonWrapper>
-                    <LinkButton sx={{ color: 'inherit', '&:hover': { color: 'var(--vscode-button-hoverBackground)' } }} onClick={addHeader}><Codicon name="add" />Header</LinkButton>
-                </AddButtonWrapper>
+                <SectionHeader onClick={() => setHeadersCollapsed(!headersCollapsed)}>
+                    <Codicon name={headersCollapsed ? 'chevron-right' : 'chevron-down'} />
+                    <Typography variant="h3" sx={{ fontWeight: 'lighter' }}>Headers</Typography>
+                </SectionHeader>
+                {!headersCollapsed && (
+                    <div style={{ marginLeft: 4 }}>
+                        <ParamList>
+                            {(request.headers || []).map((header, id) => (
+                                <ParamItem
+                                    id={`${id}`}
+                                    key={header.id}
+                                    keyValue={header.key}
+                                    value={header.value}
+                                    onKeyChange={(key) => updateHeader(header.id, key, header.value)}
+                                    onValueChange={(value) => updateHeader(header.id, header.key, value)}
+                                    onDelete={() => deleteHeader(header.id)}
+                                    keyItems={COMMON_HEADERS.map(h => h.name)}
+                                    valueItems={header.key ? (COMMON_HEADERS.find(h => h.name === header.key)?.values || []) : []}
+                                />
+                            ))}
+                        </ParamList>
+                        <AddButtonWrapper>
+                            <LinkButton sx={{ color: 'inherit', '&:hover': { color: 'var(--vscode-button-hoverBackground)' } }} onClick={addHeader}><Codicon name="add" />Header</LinkButton>
+                        </AddButtonWrapper>
+                    </div>
+                )}
             </Section>
 
             {/* Body Section: form-data, form-urlencoded, binary, and raw handled by parent */}
             {methodSupportsBody && (
                 <>
                     <BodyHeaderContainer>
-                        <BodyTitleWrapper>
+                        <BodyTitleWrapper onClick={() => setBodyCollapsed(!bodyCollapsed)}>
+                            <Codicon name={bodyCollapsed ? 'chevron-right' : 'chevron-down'} />
                             <Typography variant="h3" sx={{ margin: 0, fontWeight: 'lighter' }}>Body</Typography>
                         </BodyTitleWrapper>
                         <FormatSelectorWrapper ref={formatRef}>
@@ -329,76 +349,80 @@ export const InputForm: React.FC<InputFormProps> = ({ request, onRequestChange, 
                         </FormatSelectorWrapper>
                     </BodyHeaderContainer>
 
-                    {bodyFormat === 'form-data' && (
+                    {!bodyCollapsed && (
                         <>
-                            <MultipartForm
-                                headerKeyItems={COMMON_HEADERS.map(h => h.name)}
-                                items={request.bodyFormData}
-                                onAddParam={addFormDataParam}
-                                onAddFile={() => onRequestChange?.({ ...request, bodyFormData: [...(request.bodyFormData || []), ({ id: Date.now().toString(), key: '', filePath: '', contentType: 'application/octet-stream' } as any)] })}
-                                onUpdate={updateFormDataParam}
-                                onDelete={deleteFormDataParam}
-                                onSelectFile={handleFileSelect}
-                                onClearFile={(id) => {
-                                    const param = (request.bodyFormData || []).find(p => p.id === id);
-                                    if (param) updateFormDataParam(id, param.key, '', 'application/octet-stream', undefined);
-                                }}
-                                onContentTypeChange={updateFormDataParamContentType}
-                            />
-                        </>
-                    )}
+                            {bodyFormat === 'form-data' && (
+                                <>
+                                    <MultipartForm
+                                        headerKeyItems={COMMON_HEADERS.map(h => h.name)}
+                                        items={request.bodyFormData}
+                                        onAddParam={addFormDataParam}
+                                        onAddFile={() => onRequestChange?.({ ...request, bodyFormData: [...(request.bodyFormData || []), ({ id: Date.now().toString(), key: '', filePath: '', contentType: 'application/octet-stream' } as any)] })}
+                                        onUpdate={updateFormDataParam}
+                                        onDelete={deleteFormDataParam}
+                                        onSelectFile={handleFileSelect}
+                                        onClearFile={(id) => {
+                                            const param = (request.bodyFormData || []).find(p => p.id === id);
+                                            if (param) updateFormDataParam(id, param.key, '', 'application/octet-stream', undefined);
+                                        }}
+                                        onContentTypeChange={updateFormDataParamContentType}
+                                    />
+                                </>
+                            )}
 
-                    {bodyFormat === 'form-urlencoded' && (
-                        <>
-                            {(request.bodyFormUrlEncoded || []).map((param, id) => (
-                                <ParamItem
-                                    id={`${id}`}
-                                    key={param.id}
-                                    keyValue={param.key}
-                                    value={param.value}
-                                    onKeyChange={(key) => updateFormUrlEncodedParam(param.id, key, param.value)}
-                                    onValueChange={(value) => updateFormUrlEncodedParam(param.id, param.key, value)}
-                                    onDelete={() => deleteFormUrlEncodedParam(param.id)}
+                            {bodyFormat === 'form-urlencoded' && (
+                                <>
+                                    {(request.bodyFormUrlEncoded || []).map((param, id) => (
+                                        <ParamItem
+                                            id={`${id}`}
+                                            key={param.id}
+                                            keyValue={param.key}
+                                            value={param.value}
+                                            onKeyChange={(key) => updateFormUrlEncodedParam(param.id, key, param.value)}
+                                            onValueChange={(value) => updateFormUrlEncodedParam(param.id, param.key, value)}
+                                            onDelete={() => deleteFormUrlEncodedParam(param.id)}
+                                        />
+                                    ))}
+                                    <AddButtonWrapper>
+                                        <LinkButton sx={{ color: 'inherit', '&:hover': { color: 'var(--vscode-button-hoverBackground)' } }} onClick={addFormUrlEncodedParam}><Codicon name="add" />Add Param</LinkButton>
+                                    </AddButtonWrapper>
+                                </>
+                            )}
+
+                            {bodyFormat === 'binary' && (
+                                <>
+                                    <BinaryForm
+                                        items={request.bodyFormData}
+                                        contentTypeItems={COMMON_HEADERS.map(h => h.name)}
+                                        onAddFile={() => onRequestChange?.({ ...request, bodyFormData: [...(request.bodyFormData || []), ({ id: Date.now().toString(), key: '', filePath: '', contentType: 'application/octet-stream' } as any)] })}
+                                        onUpdate={updateFormDataParam}
+                                        onDelete={deleteFormDataParam}
+                                        onSelectFile={handleFileSelect}
+                                        onClearFile={(id) => {
+                                            const param = (request.bodyFormData || []).find(p => p.id === id);
+                                            if (param) updateFormDataParam(id, param.key, '', 'application/octet-stream', undefined);
+                                        }}
+                                        onContentTypeChange={updateFormDataParamContentType}
+                                    />
+                                </>
+                            )}
+
+                            {['json','xml','text','html','javascript'].includes(bodyFormat) && (    
+                                <CodeTextArea
+                                    id="body-textarea"
+                                    resize="vertical"
+                                    growRange={{ start: 5, offset: 10 }}
+                                    sx={{ padding: '0 4px' }}
+                                    value={request.body || ''}
+                                    onChange={(e: any) => onRequestChange?.({ ...request, body: e.target.value })}
+                                    placeholder="Enter request body..."
                                 />
-                            ))}
-                            <AddButtonWrapper>
-                                <LinkButton sx={{ color: 'inherit', '&:hover': { color: 'var(--vscode-button-hoverBackground)' } }} onClick={addFormUrlEncodedParam}><Codicon name="add" />Add Param</LinkButton>
-                            </AddButtonWrapper>
+                            )}
+
+                            {bodyFormat === 'no-body' && (
+                                <NoBodyMessage>No body will be sent with this request</NoBodyMessage>
+                            )}
                         </>
-                    )}
-
-                    {bodyFormat === 'binary' && (
-                        <>
-                            <BinaryForm
-                                items={request.bodyFormData}
-                                contentTypeItems={COMMON_HEADERS.map(h => h.name)}
-                                onAddFile={() => onRequestChange?.({ ...request, bodyFormData: [...(request.bodyFormData || []), ({ id: Date.now().toString(), key: '', filePath: '', contentType: 'application/octet-stream' } as any)] })}
-                                onUpdate={updateFormDataParam}
-                                onDelete={deleteFormDataParam}
-                                onSelectFile={handleFileSelect}
-                                onClearFile={(id) => {
-                                    const param = (request.bodyFormData || []).find(p => p.id === id);
-                                    if (param) updateFormDataParam(id, param.key, '', 'application/octet-stream', undefined);
-                                }}
-                                onContentTypeChange={updateFormDataParamContentType}
-                            />
-                        </>
-                    )}
-
-                    {['json','xml','text','html','javascript'].includes(bodyFormat) && (    
-                        <CodeTextArea
-                            id="body-textarea"
-                            resize="vertical"
-                            growRange={{ start: 5, offset: 10 }}
-                            sx={{ padding: '0 4px' }}
-                            value={request.body || ''}
-                            onChange={(e: any) => onRequestChange?.({ ...request, body: e.target.value })}
-                            placeholder="Enter request body..."
-                        />
-                    )}
-
-                    {bodyFormat === 'no-body' && (
-                        <NoBodyMessage>No body will be sent with this request</NoBodyMessage>
                     )}
                 </>
             )}

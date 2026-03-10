@@ -16,7 +16,7 @@
  * under the License.
  */
 import React from 'react';
-import { Typography } from '@wso2/ui-toolkit';
+import { Typography, Codicon } from '@wso2/ui-toolkit';
 import { InputEditor } from '../InputEditor/InputEditor';
 import { COMMON_HEADERS, COMMON_QUERY_KEYS, COMMON_BODY_SNIPPETS } from '../InputEditor/SuggestionsConstants';
 import styled from '@emotion/styled';
@@ -73,7 +73,7 @@ const getHasSpaceAfterSeparatorFromMeta = (id: string | undefined, fallback = fa
 };
 
 const BodyHeaderContainer = styled.div`display:flex;align-items:center;justify-content:space-between;margin:8px 0;gap:12px;`;
-const BodyTitleWrapper = styled.div`display:flex;align-items:center;gap:8px;flex:1;`;
+const BodyTitleWrapper = styled.div`display:flex;align-items:center;gap:8px;flex:1;cursor:pointer;`;
 const FormatSelectorWrapper = styled.div`position:relative;display:flex;justify-content:flex-end;padding-right:5px;`;
 const FormatButton = styled.button`background:transparent;border:1px solid rgba(255,255,255,0.2);color:inherit;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:6px;font-family:inherit;transition:all .2s ease;`;
 const FormatDropdown = styled.div<{ isOpen: boolean }>`position:absolute;max-height:160px;overflow:auto;top:100%;right:0;margin-top:4px;background:#3e3e42;border:1px solid rgba(255,255,255,0.2);border-radius:4px;min-width:180px;z-index:1000;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:${props => props.isOpen ? 'block' : 'none'};`;
@@ -81,6 +81,8 @@ const FormatGroupTitle = styled.div`padding:8px 10px;font-size:12px;font-weight:
 const FormatOptions = styled.div`margin-left:8px;`;
 const FormatOption = styled.div<{ isSelected: boolean }>`padding:8px 12px;cursor:pointer;font-size:13px;background-color:${p => p.isSelected ? 'rgba(255,255,255,0.1)' : 'transparent'};color:${p => p.isSelected ? '#fff' : 'rgba(255,255,255,0.8)'};&:hover{background-color:rgba(255,255,255,0.15);color:#fff}&:not(:last-child){border-bottom:1px solid rgba(255,255,255,0.1);}`;
 const ArrowIcon = styled.span<{ isOpen: boolean }>`display:inline-flex;align-items:center;transform:${p => p.isOpen ? 'rotate(180deg)' : 'rotate(0deg)'};transition:transform .2s ease;font-size:12px;`;
+
+const SectionHeader = styled.div`display:flex;align-items:center;gap:5px;cursor:pointer`;
 
 interface InputCodeProps {
     request: ApiRequest;
@@ -197,6 +199,9 @@ const NoBodyMessage = styled.div`
 
 export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFormatChange: (format: BodyFormat) => void }> = ({ request, onRequestChange, bodyFormat, onFormatChange }) => {
     const [bodyFormatOpen, setBodyFormatOpen] = React.useState(false);
+    const [queryCollapsed, setQueryCollapsed] = React.useState(false);
+    const [headersCollapsed, setHeadersCollapsed] = React.useState(false);
+    const [bodyCollapsed, setBodyCollapsed] = React.useState(false);
     const formatMenuRef = React.useRef<HTMLDivElement>(null);
     const methodSupportsBody = !['GET', 'HEAD', 'OPTIONS', 'DELETE'].includes((request.method || '').toUpperCase());
     const requestRef = React.useRef(request);
@@ -864,76 +869,45 @@ export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFo
 
     return (
         <>
-            <Typography variant="h3" sx={{ margin: '4px 0 10px 0', fontWeight: 'lighter' }}> Query Parameters  </Typography>
-            <InputEditor
-                minHeight='calc((100vh - 420px) / 3)'
-                onChange={handleQueryParametersChange}
-                onMount={(editor) => {
-                    queryEditorRef.current = editor;
-                }}
-                value={queryEditorValue}
-                codeLenses={queryParamsCodeLenses}
-                suggestions={{ queryKeys: COMMON_QUERY_KEYS }}
-            />
-
-            <Typography variant="h3" sx={{ margin: '10px 0', fontWeight: 'lighter' }}> Headers </Typography>
-            <InputEditor
-                minHeight='calc((100vh - 420px) / 3)'
-                onChange={handleHeadersChange}
-                onMount={(editor) => {
-                    headersEditorRef.current = editor;
-                }}
-                value={headersEditorValue}
-                codeLenses={headersCodeLenses}
-                suggestions={{ headers: COMMON_HEADERS }}
-            />
-
-            {methodSupportsBody && bodyFormat !== 'no-body' && (
-                <>
-                    <BodyHeaderContainer>
-                        <BodyTitleWrapper>
-                            <Typography variant="h3" sx={{ margin: 0, fontWeight: 'lighter' }}> Body </Typography>
-                        </BodyTitleWrapper>
-                        <FormatSelectorWrapper ref={formatMenuRef}>
-                            <FormatButton onClick={() => setBodyFormatOpen(!bodyFormatOpen)}>
-                                {bodyFormat.toUpperCase()}
-                                <ArrowIcon isOpen={bodyFormatOpen}>▼</ArrowIcon>
-                            </FormatButton>
-                            <FormatDropdown isOpen={bodyFormatOpen}>
-                                {[{group:'Form', options:[{label:'Multipart Form', value:'form-data'},{label:'Form URL Encoded', value:'form-urlencoded'}]},{group:'Raw', options:[{label:'JSON', value:'json'},{label:'XML', value:'xml'},{label:'TEXT', value:'text'},{label:'JavaScript', value:'javascript'},{label:'HTML', value:'html'}]},{group:'Other', options:[{label:'File / Binary', value:'binary'},{label:'No Body', value:'no-body'}]}].map((group)=> (
-                                    <div key={group.group}>
-                                        <FormatGroupTitle>{group.group}</FormatGroupTitle>
-                                        <FormatOptions>
-                                            {group.options.map((option:any) => (
-                                                <FormatOption key={option.value} isSelected={bodyFormat === option.value} onClick={() => handleFormatChange(option.value)}>
-                                                    {option.label}
-                                                </FormatOption>
-                                            ))}
-                                        </FormatOptions>
-                                    </div>
-                                ))}
-                            </FormatDropdown>
-                        </FormatSelectorWrapper>
-                    </BodyHeaderContainer>
-                    <InputEditor
-                        key={`body-editor-${bodyFormat}`}
-                        minHeight='calc((100vh - 420px) / 3)'
-                        onChange={handleBodyChange}
-                        onMount={(editor) => {
-                            bodyEditorRef.current = editor;
-                        }}
-                        value={bodyEditorValue}
-                        codeLenses={bodyCodeLenses}
-                        suggestions={{ bodySnippets: COMMON_BODY_SNIPPETS }}
-                        bodyFormat={bodyFormat}
-                    />
-                </>
+            <SectionHeader onClick={() => setQueryCollapsed(!queryCollapsed)}>
+                <Codicon name={queryCollapsed ? 'chevron-right' : 'chevron-down'} />
+                <Typography variant="h3" sx={{ fontWeight: 'lighter' }}>Query Parameters</Typography>
+            </SectionHeader>
+            {!queryCollapsed && (
+                <InputEditor
+                    minHeight='calc((100vh - 420px) / 3)'
+                    onChange={handleQueryParametersChange}
+                    onMount={(editor) => {
+                        queryEditorRef.current = editor;
+                    }}
+                    value={queryEditorValue}
+                    codeLenses={queryParamsCodeLenses}
+                    suggestions={{ queryKeys: COMMON_QUERY_KEYS }}
+                />
             )}
 
-            {methodSupportsBody && bodyFormat === 'no-body' && (
+            <SectionHeader onClick={() => setHeadersCollapsed(!headersCollapsed)}>
+                <Codicon name={headersCollapsed ? 'chevron-right' : 'chevron-down'} />
+                <Typography variant="h3" sx={{ fontWeight: 'lighter' }}>Headers</Typography>
+            </SectionHeader>
+            {!headersCollapsed && (
+                <InputEditor
+                    minHeight='calc((100vh - 420px) / 3)'
+                    onChange={handleHeadersChange}
+                    onMount={(editor) => {
+                        headersEditorRef.current = editor;
+                    }}
+                    value={headersEditorValue}
+                    codeLenses={headersCodeLenses}
+                    suggestions={{ headers: COMMON_HEADERS }}
+                />
+            )}
+
+            {methodSupportsBody && (
                 <BodyHeaderContainer>
-                    <BodyTitleWrapper>
-                        <Typography variant="h3" sx={{ fontWeight: 'lighter' }}>Body</Typography>
+                    <BodyTitleWrapper onClick={() => setBodyCollapsed(!bodyCollapsed)}>
+                        <Codicon name={bodyCollapsed ? 'chevron-right' : 'chevron-down'} />
+                        <Typography variant="h3" sx={{ margin: 0, fontWeight: 'lighter' }}>Body</Typography>
                     </BodyTitleWrapper>
                     <FormatSelectorWrapper ref={formatMenuRef}>
                         <FormatButton onClick={() => setBodyFormatOpen(!bodyFormatOpen)}>
@@ -958,8 +932,27 @@ export const InputCode: React.FC<InputCodeProps & { bodyFormat: BodyFormat; onFo
                 </BodyHeaderContainer>
             )}
 
-            {methodSupportsBody && bodyFormat === 'no-body' && (
-                <NoBodyMessage>No body will be sent with this request</NoBodyMessage>
+            {!bodyCollapsed && methodSupportsBody && (
+                <>
+                    {bodyFormat !== 'no-body' && (
+                        <InputEditor
+                            key={`body-editor-${bodyFormat}`}
+                            minHeight='calc((100vh - 420px) / 3)'
+                            onChange={handleBodyChange}
+                            onMount={(editor) => {
+                                bodyEditorRef.current = editor;
+                            }}
+                            value={bodyEditorValue}
+                            codeLenses={bodyCodeLenses}
+                            suggestions={{ bodySnippets: COMMON_BODY_SNIPPETS }}
+                            bodyFormat={bodyFormat}
+                        />
+                    )}
+
+                    {bodyFormat === 'no-body' && (
+                        <NoBodyMessage>No body will be sent with this request</NoBodyMessage>
+                    )}
+                </>
             )}
         </>
     );
