@@ -199,6 +199,7 @@ const MethodBadge = styled.span<{ method: string, isSelected: boolean }>`
 	border-radius: 3px;
 	font-size: 9px;
 	font-weight: 600;
+	height: 14px;
 	color: ${props => props.isSelected ? 'var(--vscode-inputOption-activeForeground)' : 'var(--vscode-foreground)'};
 	white-space: nowrap;
 	background-color: ${(props) => getMethodBgColor(props.method)};
@@ -207,7 +208,7 @@ const MethodBadge = styled.span<{ method: string, isSelected: boolean }>`
 const RequestItemContainer = styled.div`
 	display: flex;
 	align-items: center;
-    padding: 2px 0 2px 0;
+    padding: 3px 0 2px 0;
 	gap: 8px;
 `;
 
