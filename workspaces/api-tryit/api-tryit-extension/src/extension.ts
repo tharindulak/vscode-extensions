@@ -1573,6 +1573,26 @@ export async function activate(context: vscode.ExtensionContext) {
 				return;
 			}
 
+			// Build the payload for the webview notebook view.
+			const { parseHurlDocument: parseDoc } = await import('@wso2/api-tryit-hurl-parser');
+			const { blocks } = parseDoc(hurlContent);
+			const cells = blocks.map((block, idx) => ({
+				index: idx,
+				name: block.name,
+				method: block.method,
+				url: block.url,
+				content: block.text
+			}));
+
+			// Determine a display title (first line @collectionName or fallback).
+			const titleMatch = hurlContent.match(/^#\s*@collectionName\s+(.+)$/im);
+			const title = titleMatch?.[1]?.trim() || 'Hurl Notebook';
+
+			// Show the notebook in the MainPanel webview.
+			TryItPanel.show(context);
+			TryItPanel.postMessage('openHurlNotebook', { title, cells });
+
+			// Also open as a VS Code notebook for users who prefer that experience.
 			const notebookData = hurlTextToNotebookData(hurlContent);
 			const notebook = await vscode.workspace.openNotebookDocument(HURL_NOTEBOOK_TYPE, notebookData);
 			await vscode.window.showNotebookDocument(notebook);

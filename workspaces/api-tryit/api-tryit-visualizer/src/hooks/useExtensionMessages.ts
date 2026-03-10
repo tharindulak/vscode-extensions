@@ -26,6 +26,7 @@ import {
 	HurlRunViewContext
 } from '@wso2/api-tryit-core';
 import { getVSCodeAPI } from '../utils/vscode-api';
+import type { NotebookOpenPayload, NotebookCellResult } from '../NoteBook';
 
 // Get VS Code API instance (singleton)
 const vscode = getVSCodeAPI();
@@ -42,6 +43,8 @@ interface MessageHandlers {
 	onHurlRunViewOpened?: (context: HurlRunViewContext) => void;
 	onHurlRunEvent?: (event: HurlRunEvent) => void;
 	onHurlRunError?: (payload: { message: string; context?: HurlRunViewContext }) => void;
+	onHurlNotebookOpened?: (payload: NotebookOpenPayload) => void;
+	onNotebookCellResult?: (result: NotebookCellResult) => void;
 }
 
 /**
@@ -208,6 +211,14 @@ export const useExtensionMessages = (handlers: MessageHandlers) => {
 					message: payload?.message || 'Hurl run failed.',
 					context: payload?.context
 				});
+			}
+
+			if (type === 'openHurlNotebook' && handlersRef.current.onHurlNotebookOpened) {
+				handlersRef.current.onHurlNotebookOpened(data as NotebookOpenPayload);
+			}
+
+			if (type === 'notebookCellResult' && handlersRef.current.onNotebookCellResult) {
+				handlersRef.current.onNotebookCellResult(data as NotebookCellResult);
 			}
         };
 
