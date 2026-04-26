@@ -291,17 +291,27 @@ export function ParamEditor(props: ParamProps) {
 
         // Add default value field if available
         if (param.defaultValue) {
+            // For string-type params the default value is a Ballerina string literal that needs
+            // surrounding quotes (e.g. "application/json"). Ensure the expression editor always
+            // shows a properly quoted value so LS validation passes and Save stays enabled.
+            // Users who previously saved without quotes (old bug) will have their value fixed here.
+            const isStringParam = !param.type.value || param.type.value === "string";
+            const defaultValueType = getPrimaryInputType((param.defaultValue as PropertyModel)?.types)?.fieldType;
+            const rawDefaultValue = (param.defaultValue as PropertyModel)?.value;
+            const displayValue = isStringParam && rawDefaultValue && !rawDefaultValue.startsWith('"')
+                ? `"${rawDefaultValue}"`
+                : rawDefaultValue;
             fields.push({
                 key: `defaultValue`,
                 label: 'Default Value',
-                type: getPrimaryInputType((param.defaultValue as PropertyModel)?.types)?.fieldType,
+                type: defaultValueType,
                 optional: true,
                 advanced: isNew,
                 editable: true,
                 documentation: '',
                 enabled: true,
-                value: (param.defaultValue as PropertyModel)?.value,
-                types: [{ fieldType: getPrimaryInputType((param.defaultValue as PropertyModel).types)?.fieldType, selected: false }]
+                value: displayValue,
+                types: [{ fieldType: defaultValueType, selected: false }]
             });
         }
         setCurrentFields(fields);
@@ -324,7 +334,14 @@ export function ParamEditor(props: ParamProps) {
             headerName: { ...param.headerName, value: dataValues['headerName'] !== undefined ? `"${dataValues['headerName']}"` : param.headerName?.value },
             defaultValue: {
                 ...(param.defaultValue as PropertyModel),
-                value: dataValues['defaultValue'] ?? (param.defaultValue as PropertyModel)?.value,
+                value: (() => {
+                    const val = dataValues['defaultValue'] ?? (param.defaultValue as PropertyModel)?.value;
+                    const isStringParam = !((dataValues['type'] ?? param.type.value)) || (dataValues['type'] ?? param.type.value) === "string";
+                    if (isStringParam && val && !val.startsWith('"')) {
+                        return `"${val}"`;
+                    }
+                    return val;
+                })(),
                 enabled: !!dataValues['defaultValue']
             }
         };
@@ -369,6 +386,16 @@ export function ParamEditor(props: ParamProps) {
                         nestedForm={true}
                         helperPaneSide='left'
                         preserveFieldOrder={true}
+                        customDiagnosticFilter={(diagnostics, key) => {
+                            // For string-type params, suppress LS validation on the defaultValue field.
+                            // The value is a Ballerina string literal that must have quotes, but we
+                            // handle quote-wrapping transparently on save so validation is not needed.
+                            const isStringParam = !param.type.value || param.type.value === "string";
+                            if (key === "defaultValue" && isStringParam) {
+                                return [];
+                            }
+                            return diagnostics;
+                        }}
                     />
                 }
 

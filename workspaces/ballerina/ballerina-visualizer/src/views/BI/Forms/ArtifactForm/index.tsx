@@ -119,7 +119,7 @@ interface ArtifactFormProps {
     changeOptionalFieldTitle?: string;
     onChange?: (fieldKey: string, value: any, allValues: FormValues) => void;
     hideSaveButton?: boolean;
-    customDiagnosticFilter?: (diagnostics: Diagnostic[]) => Diagnostic[];
+    customDiagnosticFilter?: (diagnostics: Diagnostic[], key: string) => Diagnostic[];
     onValidityChange?: (isValid: boolean) => void;
     recordsOnly?: boolean;
 }
@@ -720,7 +720,7 @@ export function ArtifactForm(props: ArtifactFormProps) {
                         uniqueDiagnostics = filterUnsupportedDiagnostics(uniqueDiagnostics);
                         // Apply custom diagnostic filter if provided
                         if (customDiagnosticFilter) {
-                            uniqueDiagnostics = customDiagnosticFilter(uniqueDiagnostics);
+                            uniqueDiagnostics = customDiagnosticFilter(uniqueDiagnostics, key);
                         }
 
                         setDiagnosticsInfo({ key, diagnostics: uniqueDiagnostics });
