@@ -386,12 +386,18 @@ export function ParamEditor(props: ParamProps) {
                         nestedForm={true}
                         helperPaneSide='left'
                         preserveFieldOrder={true}
-                        customDiagnosticFilter={(diagnostics, key) => {
-                            // For string-type params, suppress LS validation on the defaultValue field.
-                            // The value is a Ballerina string literal that must have quotes, but we
-                            // handle quote-wrapping transparently on save so validation is not needed.
+                        customDiagnosticFilter={(diagnostics, key, expression) => {
+                            // For string-type params, suppress LS validation on the defaultValue field
+                            // only when the value has no surrounding quotes — we auto-wrap on save so
+                            // LS errors are misleading. If the user explicitly starts or ends with a
+                            // quote, they are writing a real expression and LS validation should run.
                             const isStringParam = !param.type.value || param.type.value === "string";
                             if (key === "defaultValue" && isStringParam) {
+                                const startsWithQuote = expression.startsWith('"');
+                                const endsWithQuote = expression.endsWith('"');
+                                if (startsWithQuote || endsWithQuote) {
+                                    return diagnostics;
+                                }
                                 return [];
                             }
                             return diagnostics;
