@@ -17,7 +17,7 @@
  */
 
 import { HurlFormatAdapter } from '../src/hurl-format-adapter';
-import type { ApiRequest } from '@wso2/api-tryit-core';
+import type { ApiRequest } from '@wso2/hurl-client-core';
 
 describe('HurlFormatAdapter serialization order', () => {
 	describe('serializeRequest', () => {

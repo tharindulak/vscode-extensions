@@ -22,7 +22,7 @@ import {
 	normalizeHurlCollectionPayload,
 	parseHurlCollection,
 } from '../src';
-import type { ApiCollection } from '@wso2/api-tryit-core';
+import type { ApiCollection } from '@wso2/hurl-client-core';
 import { parseHurlDocument } from '../src';
 
 // verify that the utility for splitting Hurl documents is available

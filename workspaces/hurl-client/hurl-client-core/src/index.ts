@@ -20,6 +20,92 @@ import type { HurlEntryResult, HurlAssertionResult } from '@wso2/api-tryit-hurl-
 
 export type { HurlEntryResult, HurlAssertionResult };
 
+// ─── API Request / Response Models ───────────────────────────────────────────
+
+export interface QueryParameter {
+    id: string;
+    key: string;
+    value: string;
+}
+
+export interface HeaderParameter {
+    id: string;
+    key: string;
+    value: string;
+}
+
+export interface FormDataParameter {
+    id: string;
+    key: string;
+    contentType: string;
+    filePath?: string;
+    value?: string;
+}
+
+export interface FormUrlEncodedParameter {
+    id: string;
+    key: string;
+    value: string;
+}
+
+export interface BinaryFileParameter {
+    id: string;
+    filePath: string;
+    contentType: string;
+    enabled?: boolean;
+}
+
+export interface ResponseHeader {
+    key: string;
+    value: string;
+}
+
+export interface ApiRequest {
+    id: string;
+    name: string;
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'TRACE';
+    url: string;
+    queryParameters: QueryParameter[];
+    headers: HeaderParameter[];
+    body?: string;
+    bodyFormData?: FormDataParameter[];
+    bodyFormUrlEncoded?: FormUrlEncodedParameter[];
+    bodyBinaryFiles?: BinaryFileParameter[];
+    assertions?: string[];
+}
+
+export interface ApiResponse {
+    statusCode: number;
+    headers: ResponseHeader[];
+    body: string;
+}
+
+export interface ApiRequestItem {
+    id: string;
+    name: string;
+    request: ApiRequest;
+    response?: ApiResponse;
+    assertions?: string[];
+    filePath?: string;
+}
+
+export interface ApiFolder {
+    id: string;
+    name: string;
+    items: ApiRequestItem[];
+    filePath?: string;
+}
+
+export interface ApiCollection {
+    id: string;
+    name: string;
+    description?: string;
+    folders: ApiFolder[];
+    rootItems?: ApiRequestItem[];
+}
+
+// ─── Notebook Types ───────────────────────────────────────────────────────────
+
 /** One cell in the notebook — corresponds to one Hurl request block. */
 export interface NotebookCellInfo {
     index: number;

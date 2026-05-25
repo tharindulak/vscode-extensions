@@ -27,7 +27,7 @@ import {
 	FormUrlEncodedParameter,
 	HeaderParameter,
 	QueryParameter
-} from '@wso2/api-tryit-core';
+} from '@wso2/hurl-client-core';
 
 type RequestSectionName = 'basic-auth' | 'query' | 'form' | 'multipart' | 'cookies' | 'options';
 type ResponseSectionName = 'captures' | 'asserts';

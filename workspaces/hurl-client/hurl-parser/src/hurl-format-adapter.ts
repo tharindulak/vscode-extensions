@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import { ApiRequest, ApiResponse, FormDataParameter } from '@wso2/api-tryit-core';
+import { ApiRequest, ApiResponse, FormDataParameter } from '@wso2/hurl-client-core';
 
 function safeDecodeURIComponent(s: string): string {
 	try { return decodeURIComponent(s); } catch { return s; }

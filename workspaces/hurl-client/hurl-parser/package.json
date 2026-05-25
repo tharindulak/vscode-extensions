@@ -19,7 +19,7 @@
     "registry": "https://npm.pkg.github.com/"
   },
   "dependencies": {
-    "@wso2/api-tryit-core": "workspace:*"
+    "@wso2/hurl-client-core": "workspace:*"
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.3.1",

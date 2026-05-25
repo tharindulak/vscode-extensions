@@ -21,7 +21,7 @@ import * as os from 'os';
 import * as fs from 'fs/promises';
 import { createHurlRunner, HurlFileResult, HurlEntryResult, HurlAssertionResult } from '@wso2/api-tryit-hurl-runner';
 import { parseHurlCollection, parseHurlDocument } from '@wso2/api-tryit-hurl-parser';
-import { ApiCollection, ApiRequestItem, ApiFolder } from '@wso2/api-tryit-core';
+import { ApiCollection, ApiRequestItem, ApiFolder } from '@wso2/hurl-client-core';
 import { getHurlBinaryManager } from '../hurl/hurl-binary-manager';
 
 interface RunHurlTestInput {
