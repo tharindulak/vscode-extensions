@@ -29,6 +29,25 @@
 - Run the following command to add the icons to the plugins:
   ```bash
   npm run build
+### Codepoints
+
+`src/generate-font/codepoints.json` records the codepoint of every icon that has ever been in the
+font. `npm run build` reads it, gives each new SVG the lowest unused codepoint, writes the file back
+and prints what it allocated — commit it along with the SVG.
+
+Without it, icons are numbered in glob order, so adding one SVG shifts the codepoint of every icon
+sorting after it. VS Code extensions hardcode those codepoints (`contributes.icons` takes a
+`fontCharacter`, not a name), so a shift repoints their icons at whatever glyph moved into the old
+slot. The icon still renders, so nothing fails — it is just the wrong icon.
+
+Deleting an SVG leaves its entry in the file. That holds the codepoint so no other glyph is given
+it, and an extension still pointing there renders an empty box rather than an unrelated icon. The
+entry does not appear in the generated `.json`, `.css` or `.ts`.
+
+Two branches that each add an icon will both claim the same codepoint. The file is sorted by
+codepoint so the two allocations conflict in git; the one merged second should take the next unused
+codepoint. The build fails if the file ever allocates one codepoint twice.
+
 ### How to use icons in plugins
 - To use icons please use the following [format](https://code.visualstudio.com/api/references/icons-in-labels).
   ````
