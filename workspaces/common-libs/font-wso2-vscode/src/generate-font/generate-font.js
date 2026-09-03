@@ -36,9 +36,16 @@ const path = require('path');
 const ICONS_DIR = path.join(__dirname, '..', 'icons');
 const CODEPOINTS_PATH = path.join(__dirname, 'codepoints.json');
 const START_CODEPOINT = 0xf101;
+// fantasticon renders a codepoint with String.fromCharCode, which keeps only the low 16 bits, so
+// 0xffff is the last codepoint this font can address. That leaves room for 0xffff - 0xf101 + 1 icons.
+const MAX_CODEPOINT = 0xffff;
 
 const readLedger = () => {
-    const ledger = JSON.parse(fs.readFileSync(CODEPOINTS_PATH, 'utf-8'));
+    // Null-prototype, so an icon named after something on Object.prototype ('toString.svg') cannot
+    // read as already allocated in allocate's `ledger[id] !== undefined`. fantasticon rejects such a
+    // filename first — loadAssets does its own `if (out[iconId])` on a plain object — so this guards
+    // against that check changing rather than against anything reachable today.
+    const ledger = Object.assign(Object.create(null), JSON.parse(fs.readFileSync(CODEPOINTS_PATH, 'utf-8')));
 
     // A merge that unions two branches' allocations can hand the same codepoint to two icons, which
     // otherwise surfaces only as one of them rendering the other's glyph.
@@ -50,11 +57,11 @@ const readLedger = () => {
         // range and can land on a slot already taken. Either way the collision goes unreported and
         // one icon silently renders another's glyph. Only hand-edits get here — writeLedger emits
         // integers — which is the same reason the collision check exists.
-        if (!Number.isInteger(codepoint) || codepoint < START_CODEPOINT || codepoint > 0xffff) {
+        if (!Number.isInteger(codepoint) || codepoint < START_CODEPOINT || codepoint > MAX_CODEPOINT) {
             throw new Error(
                 `${path.basename(CODEPOINTS_PATH)} gives '${name}' the codepoint ` +
                     `${JSON.stringify(codepoint)}, which is not a whole number between ` +
-                    `0x${START_CODEPOINT.toString(16)} and 0xffff.`
+                    `0x${START_CODEPOINT.toString(16)} and 0x${MAX_CODEPOINT.toString(16)}.`
             );
         }
         if (owners.has(codepoint)) {
@@ -95,6 +102,15 @@ const allocate = (ledger, iconIds) => {
         }
         while (used.has(next)) {
             next++;
+        }
+        // Checked here rather than left to the next build's readLedger, which would only see it
+        // after a codepoint the font cannot address had been written to the ledger and committed.
+        if (next > MAX_CODEPOINT) {
+            throw new Error(
+                `No codepoint left for '${id}': every one from 0x${START_CODEPOINT.toString(16)} to ` +
+                    `0x${MAX_CODEPOINT.toString(16)} is allocated. Retired icons still hold theirs, so ` +
+                    'reclaiming those is the way to make room.'
+            );
         }
         ledger[id] = next;
         used.add(next);
