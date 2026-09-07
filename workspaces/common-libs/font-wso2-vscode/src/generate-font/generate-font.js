@@ -20,39 +20,154 @@ const { generateFonts } = require('@twbs/fantasticon');
 const fs = require('fs');
 const path = require('path');
 
-async function generateIconFont() {
-  try {
-    // Ensure dist directory exists
-    const distDir = path.join(__dirname, '..', '..', 'dist');
-    if (!fs.existsSync(distDir)) {
-      fs.mkdirSync(distDir, { recursive: true });
-    }
+// codepoints.json is the allocation ledger for this font: every icon that has ever been in it
+// keeps the codepoint it was first given.
+//
+// Left to itself fantasticon numbers icons sequentially in glob order, so adding one SVG shifts
+// the codepoint of every icon that sorts after it. Consumers hardcode those codepoints — VS Code's
+// contributes.icons takes a fontCharacter, not a name — so a shift silently repoints their icons at
+// whatever glyph moved into the old slot, and the icon still renders, just the wrong one. That is
+// how $(ballerina-debug) ended up drawing custom.svg (wso2/product-integrator#2288).
+//
+// Feeding fantasticon a complete map removes its freedom to renumber: a new icon takes the lowest
+// unused codepoint and nothing else moves. Retired icons stay in the ledger as reservations so
+// their slot is never handed to a different glyph — a consumer still pointing at one renders an
+// empty box, which is obvious, rather than an unrelated icon, which is not.
+const ICONS_DIR = path.join(__dirname, '..', 'icons');
+const CODEPOINTS_PATH = path.join(__dirname, 'codepoints.json');
+const START_CODEPOINT = 0xf101;
+// fantasticon renders a codepoint with String.fromCharCode, which keeps only the low 16 bits, so
+// 0xffff is the last codepoint this font can address. That leaves room for 0xffff - 0xf101 + 1 icons.
+const MAX_CODEPOINT = 0xffff;
 
-    console.log('Generating icon font...');
-    
-    // Fantasticon configuration
-    const config = {
-      inputDir: path.join(__dirname, '..', 'icons'),
-      outputDir: distDir,
-      fontTypes: ['eot', 'woff2', 'woff'],
-      assetTypes: ['css', 'html', 'json', 'ts'],
-      name: 'wso2-vscode',
-      prefix: 'fw',
-      normalize: true,
-      formatOptions: {
-        json: {
-          indent: 2
+const readLedger = () => {
+    // Null-prototype, so an icon named after something on Object.prototype ('toString.svg') cannot
+    // read as already allocated in allocate's `ledger[id] !== undefined`. fantasticon rejects such a
+    // filename first — loadAssets does its own `if (out[iconId])` on a plain object — so this guards
+    // against that check changing rather than against anything reachable today.
+    const ledger = Object.assign(Object.create(null), JSON.parse(fs.readFileSync(CODEPOINTS_PATH, 'utf-8')));
+
+    // A merge that unions two branches' allocations can hand the same codepoint to two icons, which
+    // otherwise surfaces only as one of them rendering the other's glyph.
+    const owners = new Map();
+    for (const [name, codepoint] of Object.entries(ledger)) {
+        // Checked before the collision check below, which compares raw values: fantasticon turns a
+        // codepoint into a character with String.fromCharCode, so '61903' and 61903 are one glyph
+        // slot while being two distinct Map keys, and anything above 0xffff is truncated into the
+        // range and can land on a slot already taken. Either way the collision goes unreported and
+        // one icon silently renders another's glyph. Only hand-edits get here — writeLedger emits
+        // integers — which is the same reason the collision check exists.
+        if (!Number.isInteger(codepoint) || codepoint < START_CODEPOINT || codepoint > MAX_CODEPOINT) {
+            throw new Error(
+                `${path.basename(CODEPOINTS_PATH)} gives '${name}' the codepoint ` +
+                    `${JSON.stringify(codepoint)}, which is not a whole number between ` +
+                    `0x${START_CODEPOINT.toString(16)} and 0x${MAX_CODEPOINT.toString(16)}.`
+            );
         }
-      }
-    };
+        if (owners.has(codepoint)) {
+            throw new Error(
+                `${path.basename(CODEPOINTS_PATH)} allocates 0x${codepoint.toString(16)} to both ` +
+                    `'${owners.get(codepoint)}' and '${name}'. Give the icon added most recently the ` +
+                    'lowest unused codepoint instead.'
+            );
+        }
+        owners.set(codepoint, name);
+    }
+    return ledger;
+};
 
-    await generateFonts(config);
-    console.log('✅ Icon font generated successfully!');
-    
-  } catch (error) {
-    console.error('❌ Error generating icon font:', error);
-    process.exit(1);
-  }
+// Written back sorted by codepoint: allocations then append rather than interleave, so two branches
+// that both add an icon conflict in git instead of merging into a duplicate allocation.
+const writeLedger = (ledger) => {
+    const sorted = Object.entries(ledger).sort(([, a], [, b]) => a - b);
+    fs.writeFileSync(CODEPOINTS_PATH, JSON.stringify(Object.fromEntries(sorted), null, 2) + '\n', 'utf-8');
+};
+
+// fantasticon derives an icon's id from its filename ('JSONTransform copy.svg' -> 'JSONTransform-copy'),
+// so ask it for the ids rather than deriving them here. Generating no fonts and no assets makes this
+// a glob of the icons directory.
+const readIconIds = async () => {
+    const { assetsIn } = await generateFonts({ inputDir: ICONS_DIR, fontTypes: [], assetTypes: [] });
+    return Object.keys(assetsIn);
+};
+
+const allocate = (ledger, iconIds) => {
+    const used = new Set(Object.values(ledger));
+    const added = [];
+    let next = START_CODEPOINT;
+
+    for (const id of iconIds) {
+        if (ledger[id] !== undefined) {
+            continue;
+        }
+        while (used.has(next)) {
+            next++;
+        }
+        // Checked here rather than left to the next build's readLedger, which would only see it
+        // after a codepoint the font cannot address had been written to the ledger and committed.
+        if (next > MAX_CODEPOINT) {
+            throw new Error(
+                `No codepoint left for '${id}': every one from 0x${START_CODEPOINT.toString(16)} to ` +
+                    `0x${MAX_CODEPOINT.toString(16)} is allocated. Retired icons still hold theirs, so ` +
+                    'reclaiming those is the way to make room.'
+            );
+        }
+        ledger[id] = next;
+        used.add(next);
+        added.push(id);
+    }
+    return added;
+};
+
+async function generateIconFont() {
+    try {
+        const distDir = path.join(__dirname, '..', '..', 'dist');
+        if (!fs.existsSync(distDir)) {
+            fs.mkdirSync(distDir, { recursive: true });
+        }
+
+        console.log('Generating icon font...');
+
+        const ledger = readLedger();
+        const iconIds = await readIconIds();
+        const added = allocate(ledger, iconIds);
+        if (added.length > 0) {
+            writeLedger(ledger);
+            console.log(
+                `Allocated a codepoint to ${added.length} new icon(s) — commit codepoints.json ` +
+                    'along with the SVG:\n' +
+                    added.map((id) => `  ${id} -> \\${ledger[id].toString(16)}`).join('\n')
+            );
+        }
+
+        // Only the icons that exist get passed on, so a reservation for a retired icon holds its
+        // codepoint without appearing in the generated .json/.css/.ts as an icon you can use. Every
+        // id is covered, which leaves fantasticon nothing to number itself.
+        const codepoints = Object.fromEntries(iconIds.map((id) => [id, ledger[id]]));
+
+        const config = {
+            inputDir: ICONS_DIR,
+            outputDir: distDir,
+            fontTypes: ['eot', 'woff2', 'woff'],
+            assetTypes: ['css', 'html', 'json', 'ts'],
+            name: 'wso2-vscode',
+            prefix: 'fw',
+            normalize: true,
+            codepoints,
+            formatOptions: {
+                json: {
+                    indent: 2
+                }
+            }
+        };
+
+        await generateFonts(config);
+        console.log('✅ Icon font generated successfully!');
+
+    } catch (error) {
+        console.error('❌ Error generating icon font:', error);
+        process.exit(1);
+    }
 }
 
 generateIconFont();
